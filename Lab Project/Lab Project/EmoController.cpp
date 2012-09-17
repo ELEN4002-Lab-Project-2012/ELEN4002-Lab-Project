@@ -107,7 +107,7 @@ void EmoController::loop(double SSVEPfreq, bool test)
 			processEEGdata(SSVEPfreq, test);
 		}
 
-		Sleep(100);
+		Sleep(200);
 	}
 }
 

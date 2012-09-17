@@ -7,17 +7,17 @@ using namespace std;
 
 int main()
 {
-    int sampleSize = 256;
+    int sampleSize = 512;
     const int paddedSize = sampleSize + 256;     // Note that for now, I'm not using padding at all. TO DO: include padding
     const unsigned int sampleFreq = 128;
-    double SSVEPfreq = 10;
+    double SSVEPfreq = 15;
     int numChannels = 4;
  
     // PSDAclassifier, MECclassifier or CCAclassifier
     boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels));    
 
     EmoController controller(myClassifier, numChannels);        
-    controller.loop(SSVEPfreq, 1);                          // Starting the loop with option '1' means use test data.                             
+    controller.loop(SSVEPfreq, 0);                          // Starting the loop with option '1' means use test data.                             
     controller.disconnectEmoEngine();
 
 	system("PAUSE");

@@ -60,7 +60,7 @@ void MECclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7
             Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
-    cout << Y << endl;
+    //cout << Y << endl;
 }
 
 void MECclassifier::loadTestData()
@@ -75,35 +75,47 @@ void MECclassifier::loadTestData()
             Y(i, j) = channels.at(j)->getEEGSignal()[i];
         }
     }
-    cout << "Y = " << endl << Y << endl;
+    //cout << "Y = " << endl << Y << endl;
 }
 
 bool MECclassifier::detectTargetFreq(double f)
 {
-    mat Sw = findWeightedSignal(f);   // Find the new weighted signal
-    double* SwArray = new double[sampleSize];   // Transform it into a double* array
-    for(int i = 0; i != sampleSize; i++)
-        SwArray[i] = Sw(i, 0);
+    const double phaseShift = PI/8;     // 22.5deg
 
-    swFFT.calcFFT(SwArray);
+    // If there is one positive detection for any phase => +ve detection
+    for(int i = 0; i != 4; i++)
+    {
+        mat Sw = findWeightedSignal(f, i*phaseShift);       // Find the new weighted signal
+        cout << "X phaseshift = " << i*phaseShift << endl;
+        double* SwArray = new double[sampleSize];           // Transform it into a double* array
+        for(int i = 0; i != sampleSize; i++)
+            SwArray[i] = Sw(i, 0);
 
-    // Equation 11 -------
-    double upper = swFFT.getSpectrumMaxInRange(f-0.1*f, f+0.1*f);               // At f
-    double lower = swFFT.getSpectrumMaxInRange(6.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
-    double R = upper/lower;
-    cout << "R = " << R << endl;
+        swFFT.calcFFT(SwArray);
 
-    swFFT.printSpectrumCSV();                   // NB printing to test output
-    swFFT.zeroSpectrum();                       // Don't forget to zero everything (Aquilla's problem!)
-    delete SwArray;                             // Clean up memory before returning
+        // Equation 11 -------
+        double upper = swFFT.getSpectrumMaxInRange(f-0.1*f, f+0.1*f);               // At f
+        double lower = swFFT.getSpectrumMaxInRange(8.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
+        double R = upper/lower;
+        cout << "R = " << R << endl;
 
-    if (R == 1.0)                               // May have to change this if R is not precise
-        return true;
-    else
-        return false;
+        if(i == 0) 
+            swFFT.printSpectrumCSV();               // NB printing to test output
+
+        swFFT.zeroSpectrum();                       // Don't forget to zero everything (Aquilla's problem!)
+        delete SwArray;                             // Clean up memory before returning
+
+        if (R > 0.95)                               // May have to change this if R is not precise
+            return true;
+        else
+            return false;
+    }  
 }
 
-mat MECclassifier::findWeightedSignal(double fundamentalFreq)
+/**
+*   @param phaseShift Phase shift of the pure harmonics in X
+*/
+mat MECclassifier::findWeightedSignal(double fundamentalFreq, const double phaseShift)
 {
     double f1 = fundamentalFreq, f2 = 2*fundamentalFreq;        // Fundamental and second harmonic
     double dt = 1/samplingFreq;
@@ -112,8 +124,8 @@ mat MECclassifier::findWeightedSignal(double fundamentalFreq)
     for (int i = 0; i != sampleSize; ++i)
         t(i, 0) = dt*i;
     
-    mat x1 = join_rows(sin(2*PI*f1*t), cos(2*PI*f1*t));
-    mat x2 = join_rows(sin(2*PI*f2*t), cos(2*PI*f2*t));
+    mat x1 = join_rows(sin(2*PI*f1*t + phaseShift), cos(2*PI*f1*t + phaseShift));
+    mat x2 = join_rows(sin(2*PI*f2*t + phaseShift), cos(2*PI*f2*t + phaseShift));
     mat X  = join_rows(x1, x2);
 
     mat X_t    = trans(X);                     // Transpose of X

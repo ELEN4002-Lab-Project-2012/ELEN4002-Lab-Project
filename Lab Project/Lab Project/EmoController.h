@@ -29,7 +29,7 @@ class EmoController
 {
 public:
     EmoController(boost::shared_ptr<SSVEPclassifier>, int numChannels);
-    void loop(double SSVEPfreq, bool test);
+    void loop(double SSVEPfreq, bool test);     // Use test data (test == 0); use raw EEG data (test == 1)
     void disconnectEmoEngine();
 
 private:
@@ -38,12 +38,12 @@ private:
     void processEEGdata(double, bool);
     void initChannels(int nNewSamples);
     
-    EmoEngineEventHandle eEvent;		// Event handler
-	EmoStateHandle eState;				// State handler
-    DataHandle hData;                   // Data handler
+    EmoEngineEventHandle eEvent;		        // Event handler
+	EmoStateHandle eState;				        // State handler
+    DataHandle hData;                           // Data handler
 	unsigned int userID;					
     unsigned short composerPort;	
-	float secs;							// Data buffer size in seconds
+	float secs;							        // Data buffer size in seconds
 	unsigned int datarate;				
 	bool readytocollect;					
 	int option;							

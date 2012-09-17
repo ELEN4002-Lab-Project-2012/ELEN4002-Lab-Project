@@ -15,10 +15,10 @@ public:
     virtual void updateEEGData(double*, double*, double*, double*, int);
     virtual void loadTestData();      // For testing purposes
 
+private:
     bool detectTargetFreq(double desiredFreq);
 
-private:
-    mat findWeightedSignal(double fundamentalFreq);
+    mat findWeightedSignal(double fundamentalFreq, const double phaseShift);
     int sampleSize;
     double samplingFreq;
     double freqRes;

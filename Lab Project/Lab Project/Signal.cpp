@@ -70,7 +70,7 @@ void Signal::eliminateDCOffset(double *x, int size)
     if(ready)
     {
         double windowAverage = getWindowAverage(x, size);
-        cout << "Widow average is " << windowAverage << endl;
+        //cout << "Widow average is " << windowAverage << endl;
         for (int i = 0; i != size; ++i)
             x[i] -= windowAverage;
     }
@@ -91,7 +91,7 @@ double Signal::getWindowAverage(double* x, int size)
 void Signal::printSignalCSV()
 {
     ofstream myfile;
-    myfile.open("test.csv", ios::app );
+    myfile.open("test2.csv");
     for (int i=0; i!=sampleSize; i++)
     {
         myfile << signal[i] << ",";
@@ -103,10 +103,12 @@ void Signal::printSignalCSV()
 void Signal::printPaddedSignalCSV()
 {
     ofstream myfile;
-    myfile.open("test.csv", ios::app );
+    double dt = 1/samplingFreq;
+    myfile.open("test2.csv");
+    myfile << "Time (s),Magnitude" << endl;
     for (int i=0; i!=paddedSize; i++)
     {
-        myfile << paddedSignal[i] << ",";
+        myfile << i*dt << "," << paddedSignal[i] << endl;
     }
     myfile << endl;
     myfile.close();

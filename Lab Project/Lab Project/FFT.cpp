@@ -154,4 +154,3 @@ void FFT::printSpectrumCSV()
     myfile << endl;
     myfile.close();
 }
-
