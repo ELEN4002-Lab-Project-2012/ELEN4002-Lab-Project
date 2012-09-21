@@ -14,10 +14,8 @@ typedef boost::shared_ptr<Thread> CppThread;
 */
 
 /* TO DO:
-- Include zero padding functionality (ideally, an option)
 - Include window selection functionality
 - Include an averaging/low pass filter
-- Include option to change the time delay
 - Include Logger class to log the R value and accuracy values. Remove global variables
 - Write tests 1-3 completely
 */
@@ -68,9 +66,10 @@ double test1(boost::shared_ptr<EmoController> controller, Flasher flasher)
     testComplete = false;                   // Global variable stored in EmoController
     bool useTestData = true;
     double SSVEPfreq = 15;
+    bool usePadding = false;
 
     // Create and start a new SSVEP classifier thread
-    boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels));
+    boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding));
     controller->initClassifier(myClassifier, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
     thread1->start(); 
@@ -102,9 +101,10 @@ double test2(boost::shared_ptr<EmoController> controller, Flasher flasher)
     testComplete = false;                   // Global variable stored in EmoController
     bool useTestData = true;
     double SSVEPfreq = 10;
+    bool usePadding = false;
 
     // Create and start a new SSVEP classifier thread
-    boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels));
+    boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding));
     controller->initClassifier(myClassifier, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
     thread1->start(); 

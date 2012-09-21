@@ -1,13 +1,13 @@
 #include "MECclassifier.h"
 
-MECclassifier::MECclassifier(int size, double sampleFreq, int numChannels):
+MECclassifier::MECclassifier(int size, double sampleFreq, int numChannels, bool padding):
     sampleSize(size),
     samplingFreq(sampleFreq),
     freqRes(sampleFreq/size),
     counter(0),
     nChannels(numChannels),
     Y(size, numChannels),            // Nt x Ny
-    swFFT(size, sampleFreq)
+    swFFT(size, sampleFreq, padding)
 {
     // Initialise the channels
     for(int i = 0; i != nChannels; i++)
@@ -86,24 +86,24 @@ bool MECclassifier::detectTargetFreq(double f)
     for(int i = 0; i != 4; i++)
     {
         mat Sw = findWeightedSignal(f, i*phaseShift);               // Find the new weighted signal
-        //cout << "X phaseshift = " << i*phaseShift << endl;        // #################
+        //cout << "X phaseshift = " << i*phaseShift << endl;       
         double* SwArray = new double[sampleSize];                   // Transform it into a double* array
         for(int i = 0; i != sampleSize; i++)
             SwArray[i] = Sw(i, 0);
 
-        swFFT.calcFFT(SwArray);
+        swFFT.calcFFT(SwArray, sampleSize);
 
         // Equation 11 -------
         double upper = swFFT.getSpectrumMaxInRange(f-0.1*f, f+0.1*f);               // At f
         double lower = swFFT.getSpectrumMaxInRange(8.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
         double R = upper/lower;
-        cout << "R = " << R << ". ";                // #################
+        cout << "R = " << R << ". ";             
 
         swFFT.zeroSpectrum();                       // Don't forget to zero everything (Aquilla's problem!)
         delete SwArray;                             // Clean up memory before returning
 
         if (R > 0.95){                              // May have to change this if R is not precise
-            swFFT.printSpectrumCSV();               // NB printing to test output
+            //swFFT.printSpectrumCSV();               // NB printing to test output
             return true;
         }
         else

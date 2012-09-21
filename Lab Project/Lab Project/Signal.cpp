@@ -5,7 +5,7 @@ Signal::Signal(int size, int padSize, double freq):
     samplingFreq(freq), 
     sampleSize(size), 
     paddedSize(padSize),
-    plt("Input signal") 
+    plt("Input signal")
 {
     freqRes = samplingFreq / sampleSize;       
     signal = new double[sampleSize];
@@ -90,11 +90,13 @@ double Signal::getWindowAverage(double* x, int size)
 // TO TEST OUTPUT------------------------------------------------------------------
 void Signal::printSignalCSV()
 {
+    double dt = 1/samplingFreq;
     ofstream myfile;
-    myfile.open("test2.csv");
+    myfile.open("test2.csv");  
+    myfile << "Time (s),Magnitude" << endl;
     for (int i=0; i!=sampleSize; i++)
     {
-        myfile << signal[i] << ",";
+        myfile << i*dt << "," << signal[i] << endl;
     }
     myfile << endl;
     myfile.close();

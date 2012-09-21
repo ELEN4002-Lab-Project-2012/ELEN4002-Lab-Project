@@ -17,9 +17,9 @@ using namespace std;
 class FFT
 {
 public:
-    FFT(int size, double rate);
-    void calcFFT(boost::shared_ptr<Signal> signal);
-    void calcFFT(double*); 
+    FFT(int size, double rate, bool pad);
+    void calcFFT(boost::shared_ptr<Signal> signal, int size);
+    void calcFFT(double*, int size); 
     void calcAbsAveSpectrum();
     void zeroSpectrum();
     double getSpectrumMaxInRange(int nLower, int nUpper);
@@ -35,15 +35,17 @@ public:
     void displayAverageSpectrum();
 
 private:
+    void initFFT(int complexSize, double freq);
     void initAbsoluteSpectrum();
-
+    double* zeroPad(double* signal, int sampleSize);
     int absFFTsize;
     int complexFFTsize;
     double samplingFreq;
     double freqRes;
     vector<boost::shared_array<double>> FFTbuffer;
+    bool padded;
 
-    Aquila::OouraFft fft;
+    boost::shared_ptr<Aquila::OouraFft> fft_ptr;
     Aquila::ComplexType* complexSpectrum;
     boost::shared_array<double> absSpectrum;
     boost::shared_array<double> aveAbsSpectrum;

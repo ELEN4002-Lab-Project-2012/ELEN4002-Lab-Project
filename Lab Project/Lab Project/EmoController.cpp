@@ -1,20 +1,20 @@
 #include "EmoController.h"
 
-// Global variables for testing purposes ###############
+// Global variables for testing purposes
 bool testComplete;
 double accuracy;
 
-EmoController::EmoController(int numChannels):        // ################
-    nChannels(numChannels)
+EmoController::EmoController(int numChannels):      
+    nChannels(numChannels),
+    delayTime(200)              // Default d = 200ms
 {
     initEmotiv();
     connectEmoEngine();
 }
 
-// ################
 // The classifier is instantiated and connected to Emotiv once. 
 // Thereafter, this function must be called to initialise the classifier for each test type
-void EmoController::initClassifier(boost::shared_ptr<SSVEPclassifier> myClassifier, double detectionFreq, bool isTest)     // ################
+void EmoController::initClassifier(Classifier myClassifier, double detectionFreq, bool isTest)    
 {
     classifier = myClassifier;
     SSVEPfreq = detectionFreq;
@@ -24,11 +24,21 @@ void EmoController::initClassifier(boost::shared_ptr<SSVEPclassifier> myClassifi
     accuracy = 0;
 }
 
-// ################
 // Virtual Runnable function. This is where the thread starts execution.
 void EmoController::run()
 {
     loop();
+}
+
+// Set the delay time in milliseconds
+void EmoController::setDelayTime(double time)
+{
+    if(time < 0)
+        cerr << "Cannot set negative time" << endl;
+    if(time > 1000)
+        cerr << "Delay time too large" << endl;
+
+    delayTime = time;
 }
 
 void EmoController::connectEmoEngine()
@@ -133,7 +143,7 @@ void EmoController::loop()
 			processEEGdata(SSVEPfreq, test);
 		}
 
-		Sleep(200);
+		Sleep(delayTime);
 	}
     accuracy = ((double)positiveDetections/(double)totDetections)*100;
     testComplete = false;

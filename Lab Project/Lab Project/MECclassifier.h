@@ -10,14 +10,13 @@
 class MECclassifier: public SSVEPclassifier
 {
 public:
-    MECclassifier(int sampleSize, double sampleFreq, int numChannels);
+    MECclassifier(int sampleSize, double sampleFreq, int numChannels, bool padding);
     virtual bool isSSVEPpresent(double desiredFreq);
     virtual void updateEEGData(double*, double*, double*, double*, int);
     virtual void loadTestData();      // For testing purposes
 
 private:
     bool detectTargetFreq(double desiredFreq);
-
     mat findWeightedSignal(double fundamentalFreq, const double phaseShift);
     int sampleSize;
     double samplingFreq;

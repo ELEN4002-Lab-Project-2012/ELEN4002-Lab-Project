@@ -1,6 +1,6 @@
 #include "PSDAclassifier.h"
 
-PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels):
+PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels, bool padded):
     sampleSize(size),
     samplingFreq(sampleFreq),
     freqRes(sampleFreq/size),
@@ -11,7 +11,7 @@ PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels):
     for(int i = 0; i != nChannels; i++)
     {
         boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq));
-        boost::shared_ptr<FFT> fft_ptr(new FFT(sampleSize, samplingFreq));
+        boost::shared_ptr<FFT> fft_ptr(new FFT(sampleSize, samplingFreq, padded));
         channels.push_back(signal_ptr);
         FFTs.push_back(fft_ptr);
     }
@@ -65,7 +65,7 @@ void PSDAclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP
 
     for(int i = 0; i != nChannels; i++) {
         channels.at(i)->averageSignal();
-        FFTs.at(i)->calcFFT(channels.at(i));
+        FFTs.at(i)->calcFFT(channels.at(i), sampleSize);
     }
     //FFTs.at(0)->printSpectrumCSV();
 }
@@ -76,7 +76,7 @@ void PSDAclassifier::loadTestData()
 {
     for(int i = 0; i != nChannels; i++) {
         channels.at(i)->loadTestData();
-        FFTs.at(i)->calcFFT(channels.at(i));
+        FFTs.at(i)->calcFFT(channels.at(i), sampleSize);
     }
     FFTs.at(0)->printSpectrumCSV();
 }

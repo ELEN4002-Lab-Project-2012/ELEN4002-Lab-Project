@@ -18,6 +18,8 @@
 #include "SSVEPclassifier.h"
 #include <boost\shared_ptr.hpp>
 
+typedef boost::shared_ptr<SSVEPclassifier> Classifier;
+
 #pragma comment(lib, "../lib/edk.lib")   // Refer linker to the lib folder. 
 using namespace std;
 using namespace arma;
@@ -32,8 +34,9 @@ public:
     EmoController(int numChannels);                                                                             // ################
     void loop();                                                                                                // ################
     void disconnectEmoEngine();                                                                                 // ################
-    void initClassifier(boost::shared_ptr<SSVEPclassifier> myClassifier, double detectionFreq, bool isTest);    // ################
+    void initClassifier(Classifier myClassifier, double detectionFreq, bool isTest);    // ################
     virtual void run();
+    void setDelayTime(double time);
 
 private:
     void connectEmoEngine();
@@ -41,6 +44,7 @@ private:
     void processEEGdata(double, bool);
     void initChannels(int nNewSamples);
     
+    double delayTime;
     double SSVEPfreq;                           // ################
     bool test;                                  // ################
     EmoEngineEventHandle eEvent;		        // Event handler
@@ -53,7 +57,7 @@ private:
 	bool readytocollect;					
 	int option;							
 	int state;
-    boost::shared_ptr<SSVEPclassifier> classifier;
+    Classifier classifier;
     int nChannels;
     vector<double*> channels;
 
