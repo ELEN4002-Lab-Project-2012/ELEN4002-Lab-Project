@@ -3,22 +3,45 @@
 #include "MECclassifier.h"
 #include <iostream>
 #include <boost\shared_ptr.hpp>
+#include "Thread.h"
 using namespace std;
+
+typedef boost::shared_ptr<Thread> CppThread;
+// Global variables
+extern bool testComplete;
+extern double accuracy;
 
 int main()
 {
     int sampleSize = 512;
-    const int paddedSize = sampleSize + 256;     // Note that for now, I'm not using padding at all. TO DO: include padding
+    const int paddedSize = sampleSize + 256;    // Note that for now, I'm not using padding at all. TO DO: include padding
     const unsigned int sampleFreq = 128;
-    double SSVEPfreq = 15;
+    double SSVEPfreq = 10;
+    bool useTestData = true;                   // 0 = use raw EEG data, 1 = test data.
     int numChannels = 4;
+    testComplete = false;
  
-    // PSDAclassifier, MECclassifier or CCAclassifier
+    // Here we choose the classifier type: PSDAclassifier, MECclassifier or CCAclassifier. In this case I chose MEC
     boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels));    
 
-    EmoController controller(myClassifier, numChannels);        
-    controller.loop(SSVEPfreq, 0);                          // Starting the loop with option '1' means use test data.                             
-    controller.disconnectEmoEngine();
+    /* Multithreading example ---------------------------------------------
+       Note that the EmoController can also be run on a separate thread. To do this, you need to:
+       - First create the controller as a shared_ptr -> add it to the thread -> start the thread -> wait for completion.
+       Example: */
+
+    boost::shared_ptr<EmoController> myController(new EmoController(numChannels));
+    myController->initClassifier(myClassifier,SSVEPfreq,useTestData);
+    CppThread thread1(new Thread(myController));    // Create the thread
+    thread1->start();                               // Resumes the thread & calls the loop function.
+    Sleep(3000);                                    // Main thread does something else while SSVEP algorithme executes....
+    testComplete = true;                            // To stop the thread, you need to change the testComplete variable (see test Suite main())
+    thread1->waitForCompletion();                   // Wait for the thread to finish execution
+    
+    /* We may choose to NOT run the controller on a separate thread. In this case we do the following:
+    EmoController controller(numChannels);  
+    controller.initClassifier(myClassifier,SSVEPfreq,useTestData);
+    controller.loop();                                                      
+    controller.disconnectEmoEngine();*/
 
 	system("PAUSE");
 

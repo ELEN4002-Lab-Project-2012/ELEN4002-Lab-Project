@@ -15,7 +15,7 @@ MECclassifier::MECclassifier(int size, double sampleFreq, int numChannels):
         boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq));
         channels.push_back(signal_ptr);
     }
-    cout << "MEC classifier instantiated" << endl;
+    //cout << "MEC classifier instantiated" << endl;        // #################
 }
 
 bool MECclassifier::isSSVEPpresent(double desiredFreq)
@@ -85,9 +85,9 @@ bool MECclassifier::detectTargetFreq(double f)
     // If there is one positive detection for any phase => +ve detection
     for(int i = 0; i != 4; i++)
     {
-        mat Sw = findWeightedSignal(f, i*phaseShift);       // Find the new weighted signal
-        cout << "X phaseshift = " << i*phaseShift << endl;
-        double* SwArray = new double[sampleSize];           // Transform it into a double* array
+        mat Sw = findWeightedSignal(f, i*phaseShift);               // Find the new weighted signal
+        //cout << "X phaseshift = " << i*phaseShift << endl;        // #################
+        double* SwArray = new double[sampleSize];                   // Transform it into a double* array
         for(int i = 0; i != sampleSize; i++)
             SwArray[i] = Sw(i, 0);
 
@@ -97,16 +97,15 @@ bool MECclassifier::detectTargetFreq(double f)
         double upper = swFFT.getSpectrumMaxInRange(f-0.1*f, f+0.1*f);               // At f
         double lower = swFFT.getSpectrumMaxInRange(8.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
         double R = upper/lower;
-        cout << "R = " << R << endl;
-
-        if(i == 0) 
-            swFFT.printSpectrumCSV();               // NB printing to test output
+        cout << "R = " << R << ". ";                // #################
 
         swFFT.zeroSpectrum();                       // Don't forget to zero everything (Aquilla's problem!)
         delete SwArray;                             // Clean up memory before returning
 
-        if (R > 0.95)                               // May have to change this if R is not precise
+        if (R > 0.95){                              // May have to change this if R is not precise
+            swFFT.printSpectrumCSV();               // NB printing to test output
             return true;
+        }
         else
             return false;
     }  

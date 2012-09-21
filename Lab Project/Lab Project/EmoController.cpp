@@ -1,11 +1,34 @@
 #include "EmoController.h"
 
-EmoController::EmoController(boost::shared_ptr<SSVEPclassifier> myClassifier, int numChannels):
-    classifier(myClassifier),        // Polymorphically create new classifier
+// Global variables for testing purposes ###############
+bool testComplete;
+double accuracy;
+
+EmoController::EmoController(int numChannels):        // ################
     nChannels(numChannels)
 {
     initEmotiv();
     connectEmoEngine();
+}
+
+// ################
+// The classifier is instantiated and connected to Emotiv once. 
+// Thereafter, this function must be called to initialise the classifier for each test type
+void EmoController::initClassifier(boost::shared_ptr<SSVEPclassifier> myClassifier, double detectionFreq, bool isTest)     // ################
+{
+    classifier = myClassifier;
+    SSVEPfreq = detectionFreq;
+    test = isTest;
+    totDetections = 0;
+    positiveDetections = 0;
+    accuracy = 0;
+}
+
+// ################
+// Virtual Runnable function. This is where the thread starts execution.
+void EmoController::run()
+{
+    loop();
 }
 
 void EmoController::connectEmoEngine()
@@ -73,7 +96,8 @@ void EmoController::disconnectEmoEngine()
 	EE_EmoEngineEventFree(eEvent);
 }
 
-void EmoController::loop(double SSVEPfreq, bool test)
+// ###############
+void EmoController::loop()
 {   
     if(test) {
         classifier->loadTestData();
@@ -83,7 +107,9 @@ void EmoController::loop(double SSVEPfreq, bool test)
     cout << "Start receiving EEG Data! Press any key to stop logging...\n" << endl;
     EE_DataSetBufferSizeInSec(secs);		// Initialise the data buffer size in seconds
 
-    while (!_kbhit()) {
+    // ###############
+    // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread
+    while (!testComplete) {
 
 		state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
 
@@ -94,7 +120,7 @@ void EmoController::loop(double SSVEPfreq, bool test)
 
 			// Log the EmoState if it has been updated
 			if (eventType == EE_UserAdded) {			// Note that an EE_UserAdded event is created soon after EE_EngineConnect
-				std::cout << "User added";
+				std::cout << "User added" << endl << endl;
 				EE_DataAcquisitionEnable(userID,true);	// Enable data acquisition
 				readytocollect = true;					// Once a user has been added, read to collect data
 			}
@@ -109,6 +135,8 @@ void EmoController::loop(double SSVEPfreq, bool test)
 
 		Sleep(200);
 	}
+    accuracy = ((double)positiveDetections/(double)totDetections)*100;
+    testComplete = false;
 }
 
 void EmoController::processEEGdata(double desiredFreq, bool test)
@@ -125,13 +153,13 @@ void EmoController::processEEGdata(double desiredFreq, bool test)
     // The number of samples can be used to set up a buffer for retrieval into your application as shown
 	EE_DataGetNumberOfSample(hData,&nSamplesTaken);
 		
-	std::cout << endl << "Updated with " << nSamplesTaken << " samples. " << std::endl;
+	std::cout << "Updated with " << nSamplesTaken << " samples. ";
 
 	if (nSamplesTaken != 0 ) {
                 
         cout << "Updating data" << endl;
         // ED_P7, ED_O1, ED_O2, ED_P8. For now this is just hard coded
-        double* dataO1 = new double[nSamplesTaken];     // new data buffer initialised with sample size
+        double* dataO1 = new double[nSamplesTaken];         // new data buffer initialised with sample size
         double* dataO2 = new double[nSamplesTaken];
         double* dataP7 = new double[nSamplesTaken];
         double* dataP8 = new double[nSamplesTaken];
@@ -143,24 +171,31 @@ void EmoController::processEEGdata(double desiredFreq, bool test)
 
         classifier->updateEEGData(dataO1, dataO2, dataP7, dataP8, nSamplesTaken);
 
-        if(classifier->isSSVEPpresent(desiredFreq))
-            cout << "SSVEP found!" << endl;             // >>>> This is where the brain switch turns on <<<<
+        // #################
+        totDetections++;
+        if(classifier->isSSVEPpresent(desiredFreq)) {
+            cout << "SSVEP found :-)" << endl;
+            positiveDetections++;
+        }             
         else
-            cout << "SSVEP not found" << endl;
+            cout << "SSVEP not found :-(" << endl;
 
 		delete[] dataO1;
         delete[] dataO2;
         delete[] dataP7;
         delete[] dataP8;
 	}
-    //cout << "=====================================================================" << endl;
 
+    // #################
     if(test)        // Called if we are using test data
     {
-        if(classifier->isSSVEPpresent(desiredFreq))
-            cout << "SSVEP found!" << endl;             
+        totDetections++;
+        if(classifier->isSSVEPpresent(desiredFreq)) {
+            cout << "SSVEP found :-)" << endl;          
+            positiveDetections++;
+        }
         else
-            cout << "SSVEP not found" << endl;
+            cout << "SSVEP not found :-(" << endl;
     }
 }
 
