@@ -1,6 +1,6 @@
 #include "PSDAclassifier.h"
 
-PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels):
+PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels, bool padded, Aquila::WindowType window):
     sampleSize(size),
     samplingFreq(sampleFreq),
     freqRes(sampleFreq/size),
@@ -10,8 +10,8 @@ PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels):
     // Initialise the channels and FFTs
     for(int i = 0; i != nChannels; i++)
     {
-        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq));
-        boost::shared_ptr<FFT> fft_ptr(new FFT(sampleSize, samplingFreq));
+        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq, window));
+        boost::shared_ptr<FFT> fft_ptr(new FFT(sampleSize, samplingFreq, padded));
         channels.push_back(signal_ptr);
         FFTs.push_back(fft_ptr);
     }
@@ -64,8 +64,8 @@ void PSDAclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP
     channels.at(3)->updateSignal(dataP8, nSamplesTaken);
 
     for(int i = 0; i != nChannels; i++) {
-        channels.at(i)->averageSignal();
-        FFTs.at(i)->calcFFT(channels.at(i));
+        channels.at(i)->processSignal();
+        FFTs.at(i)->calcFFT(channels.at(i), sampleSize);
     }
     //FFTs.at(0)->printSpectrumCSV();
 }
@@ -76,7 +76,7 @@ void PSDAclassifier::loadTestData()
 {
     for(int i = 0; i != nChannels; i++) {
         channels.at(i)->loadTestData();
-        FFTs.at(i)->calcFFT(channels.at(i));
+        FFTs.at(i)->calcFFT(channels.at(i), sampleSize);
     }
     FFTs.at(0)->printSpectrumCSV();
 }
@@ -102,44 +102,3 @@ bool PSDAclassifier::detectTargetFreq(boost::shared_ptr<FFT> fft, double desired
     else  
         return false;
 }
-
-/* //Old version
-bool PSDAclassifier::detectTargetFreq(boost::shared_ptr<FFT> fft, double desiredFreq)
-{
-    int n1 = 0, n2 = 0, n = 0;     // Index of first and second harmonics. n is a dummy variable
-    int FFTsize = fft->getAbsFFTsize();
-    
-    // Find the index corresponding to the first harmonic. Note that f_n = n * delta_f
-    n = int(floor( desiredFreq / freqRes ));
-    if (n > FFTsize)
-        cerr << "Requested frequency not in range: index = " << n << endl;
-    else
-        n1 = n;
-
-    // Second harmonic
-    n = int(floor( 2*desiredFreq / freqRes ));
-    if(n > FFTsize) {
-        cout << "Second harmonic frequency not in range: index = " << n << ". Setting to zero" << endl;
-        n2 = 0;
-    }
-    else
-        n2 = n;
-
-    cout << "Freq resolution = " << freqRes << endl;
-    // Find the maximum within a range of 2*delta_f on either side of this.
-    double max1 = fft->getSpectrumMaxInRange(n1 - 1, n1 + 1);
-    double max2;
-    if (n2 == 0)
-        max2 = 0; 
-    else
-        max2 = fft->getSpectrumMaxInRange(n2 - 1, n2 + 1);
-
-    cout << "Max1 = " << max1 << endl;
-    cout << "Max2 = " << max2 << endl;
-
-    double ave = fft->getSpectrumAverage();
-    if( (max1 + max2) > 2*ave )
-        return true;  
-    else  
-        return false;
-} */

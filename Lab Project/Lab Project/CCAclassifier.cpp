@@ -1,6 +1,6 @@
 #include "CCAclassifier.h"
 
-CCAclassifier::CCAclassifier(int size, double sampleFreq, int numChannels):
+CCAclassifier::CCAclassifier(int size, double sampleFreq, int numChannels,Aquila::WindowType window):
     sampleSize(size),
     samplingFreq(sampleFreq),
     freqRes(sampleFreq/size),
@@ -9,7 +9,7 @@ CCAclassifier::CCAclassifier(int size, double sampleFreq, int numChannels):
     // Initialise the channels
     for(int i = 0; i != nChannels; i++)
     {
-        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq));
+        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq, window));
         channels.push_back(signal_ptr);
     }
     cout << "CCA classifier instantiated" << endl;
@@ -29,7 +29,7 @@ void CCAclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7
     channels.at(3)->updateSignal(dataP8, nSamplesTaken);
 
     for(int i = 0; i != nChannels; i++) {
-        channels.at(i)->averageSignal();                        // Average the signal for each channel (remove DC offset)
+        channels.at(i)->processSignal();                        // Average the signal for each channel (remove DC offset)
     }
 
     for(int i = 0; i != sampleSize; i++) {                      // Fill the Y matrix with data.

@@ -1,11 +1,57 @@
 #include "EmoController.h"
 
-EmoController::EmoController(boost::shared_ptr<SSVEPclassifier> myClassifier, int numChannels):
-    classifier(myClassifier),        // Polymorphically create new classifier
-    nChannels(numChannels)
+// Global variables for testing purposes
+bool testComplete;
+vector<double> accuracy;
+
+EmoController::EmoController(int numChannels):      
+    nChannels(numChannels),
+    delayTime(200)              // Default d = 200ms
 {
     initEmotiv();
     connectEmoEngine();
+}
+
+// The classifier is instantiated and connected to Emotiv once. 
+// Thereafter, this function must be called to initialise the classifier for each test type
+void EmoController::initClassifier(Classifier myClassifier, double detectionFreq, bool isTest)    
+{
+    classifier = myClassifier;
+    SSVEPfreqs.clear();
+    SSVEPfreqs.push_back(detectionFreq);
+    test = isTest;
+    totDetections = 0;
+    positiveDetections = 0;
+    accuracy.clear(); 
+}
+
+// Override
+void EmoController::initClassifier(Classifier myClassifier, vector<double> detectionFreqs, bool isTest)
+{
+    classifier = myClassifier;
+    SSVEPfreqs.clear();
+    SSVEPfreqs = detectionFreqs;
+    test = isTest;
+    totDetections = 0;
+    positiveDetections = 0;
+    accuracy.clear(); 
+}
+
+// Virtual Runnable function. This is where the thread starts execution.
+void EmoController::run()
+{
+    loop();
+}
+
+// Set the delay time in milliseconds
+void EmoController::setDelayTime(double time)
+{
+    if(time < 0)
+        cerr << "Cannot set negative time" << endl;
+    if(time > 1000)
+        cerr << "Delay time too large" << endl;
+
+    delayTime = time;
 }
 
 void EmoController::connectEmoEngine()
@@ -57,6 +103,7 @@ void EmoController::initEmotiv()
     eEvent          = EE_EmoEngineEventCreate();
     eState          = EE_EmoStateCreate();
     hData           = EE_DataCreate();
+	eProfile		= EE_ProfileEventCreate();
 	userID          = 0;
 	composerPort    = 1726;
 	secs            = 0.5;		                    // NB: initialise the buffer with 0.5*128 = 64 samples 	
@@ -73,42 +120,158 @@ void EmoController::disconnectEmoEngine()
 	EE_EmoEngineEventFree(eEvent);
 }
 
-void EmoController::loop(double SSVEPfreq, bool test)
-{   
+void EmoController::loop()
+{       
     if(test) {
         classifier->loadTestData();
         cout << "Loaded test data" << endl;
     }
     
-    cout << "Start receiving EEG Data! Press any key to stop logging...\n" << endl;
-    EE_DataSetBufferSizeInSec(secs);		// Initialise the data buffer size in seconds
+    //cout << "Start receiving EEG Data! Press any key to stop logging...\n" << endl;
+    EE_DataSetBufferSizeInSec(secs);		                // Initialise the data buffer size in seconds
 
-    while (!_kbhit()) {
+    for(int i = 0; i != SSVEPfreqs.size(); i++)             // Outer loop for multiple frequencies
+    {
+        // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread
+        while (!testComplete ) 
+		{
+			//|| !_kbhit() - Try having Keyboard Inhibit function with an OR Tests
+		    
+			state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
 
-		state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
+		    if (state == EDK_OK) 
+			{						    // Operation has been carried out successfully (no error)
 
-		if (state == EDK_OK) {						    // Operation has been carried out successfully (no error)
+			    EE_Event_t eventType = EE_EmoEngineEventGetType(eEvent);
+			    EE_EmoEngineEventGetUserId(eEvent, &userID);
 
-			EE_Event_t eventType = EE_EmoEngineEventGetType(eEvent);
-			EE_EmoEngineEventGetUserId(eEvent, &userID);
+			    // Log the EmoState if it has been updated
+			switch (eventType) 
+				{
+				case EE_UserAdded:				
+					{			// Note that an EE_UserAdded event is created soon after EE_EngineConnect
+				    std::cout << "User added" << endl << endl;
+				    EE_DataAcquisitionEnable(userID,true);	// Enable data acquisition
+				    readytocollect = true;					// Once a user has been added, read to collect data
+			    
+				
+				if (!LoadProfile())
+					{
+						std::cout << "++==Loading of user profile Failed!==++ \n";
+						std::cout << "Trying to do any cognitive stuff will fail stupidly! \n";
+						
+					}
+						for(int a=0; a < 10 ; a++)
+						{
+							cout << "*";
+							Sleep(200);
 
-			// Log the EmoState if it has been updated
-			if (eventType == EE_UserAdded) {			// Note that an EE_UserAdded event is created soon after EE_EngineConnect
-				std::cout << "User added";
-				EE_DataAcquisitionEnable(userID,true);	// Enable data acquisition
-				readytocollect = true;					// Once a user has been added, read to collect data
+						}
+						cout << "\n" ;
+			         
+				}
+				case EE_EmoStateUpdated:
+				{	
+					EE_EmoEngineEventGetEmoState(eEvent, eState); 
+
+					EE_CognitivAction_t actionType;
+					actionType = ES_CognitivGetCurrentAction(eState);
+					float actionPower;
+					actionPower = ES_CognitivGetCurrentActionPower(eState);
+
+					if  (COG_NEUTRAL  == ES_CognitivGetCurrentAction(eState) )	cout << "NEUTRAL! \n";
+					if  (COG_LIFT  == ES_CognitivGetCurrentAction(eState) )	cout << "LIFTING! \n";
+					if  ( COG_PUSH == ES_CognitivGetCurrentAction(eState) )	cout << "PUSHING ! \n";
+					if  (COG_PULL  == ES_CognitivGetCurrentAction(eState) )	cout << "PULLING ! \n";
+					if  ( COG_DROP   == ES_CognitivGetCurrentAction(eState) )	cout << "DROPPING ! \n";
+					if  ( COG_LEFT == ES_CognitivGetCurrentAction(eState) )	cout << "LEFT ! \n";
+
+						
+
+
+					HANDLE pipe = CreateFile(
+						L"\\\\.\\pipe\\EEG_DATA_PIPE",
+						GENERIC_WRITE, // only need write access
+						FILE_SHARE_READ | FILE_SHARE_WRITE,
+						NULL,
+						OPEN_EXISTING,
+						FILE_ATTRIBUTE_NORMAL,
+						NULL
+					);
+					DWORD OhCrap;
+					if (pipe == INVALID_HANDLE_VALUE) {
+						wcout << "Failed to connect to pipe." << endl;
+						// look up error code here using GetLastError()
+							
+							OhCrap = GetLastError();
+						
+					}
+					else
+					{
+						//string strData;
+						//strData = "Rudolf";
+
+						//populate eegDATA IF the pipe could be created, otherwise, why bother?
+						eegTxRxData currentEEGdata(
+							ES_CognitivGetCurrentAction(eState),
+							ES_CognitivGetCurrentActionPower(eState),
+							ES_CognitivIsActive(eState),
+							ES_GetContactQuality(eState,EE_CHAN_O1),
+							ES_GetContactQuality(eState,EE_CHAN_O2),
+							ES_GetContactQuality(eState,EE_CHAN_P7 ),
+							ES_GetContactQuality(eState,EE_CHAN_P8 ),
+							ES_GetHeadsetOn(eState)
+							);
+				
+						//Serialize
+						std::stringstream MyStringStream ;
+						boost::archive::text_oarchive oa(MyStringStream);
+						// write class instance to archive
+						oa << currentEEGdata;
+						DWORD numBytesWritten = 0;
+						BOOL result = WriteFile(
+							pipe, // handle to our outbound pipe
+							MyStringStream.str().c_str(), // data to send
+							MyStringStream.str().length(), // length of data to send (bytes)
+							&numBytesWritten, // will store actual amount of data sent
+							NULL // not using overlapped IO
+							);
+
+
+						CloseHandle(pipe);
+					}
+
+
+						
+						break;
+				}
+
+					// Handle Cognitiv training related event
+				case EE_CognitivEvent:
+				{
+						std::cout << "COGNITIVE EVENT";
+						//handleCognitivEvent(std::cout, eEvent);
+						break;
+				}
+					default:
+						break;
+				}
 			}
+			
 
-            // COGNITIV SUITE CODE WILL PROBABLY GO HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		}
+            // Process raw EEG data...
+		    if (readytocollect) {
+                processEEGdata(SSVEPfreqs.at(i), test);
+		    }
 
-        // Process raw EEG data...
-		if (readytocollect) {
-			processEEGdata(SSVEPfreq, test);
-		}
+		    Sleep(delayTime);
+	    }
+        // Note that accuracy will be exactly the same size as SSVEPfreqs
+        // Note that we take totDetections-2 to allow time for initialisation 
+        accuracy.push_back(((double)positiveDetections/(double)(totDetections-2))*100);
 
-		Sleep(200);
 	}
+    testComplete = false;
 }
 
 void EmoController::processEEGdata(double desiredFreq, bool test)
@@ -125,13 +288,13 @@ void EmoController::processEEGdata(double desiredFreq, bool test)
     // The number of samples can be used to set up a buffer for retrieval into your application as shown
 	EE_DataGetNumberOfSample(hData,&nSamplesTaken);
 		
-	std::cout << endl << "Updated with " << nSamplesTaken << " samples. " << std::endl;
+	std::cout << "Updated with " << nSamplesTaken << " samples. ";
 
 	if (nSamplesTaken != 0 ) {
                 
         cout << "Updating data" << endl;
         // ED_P7, ED_O1, ED_O2, ED_P8. For now this is just hard coded
-        double* dataO1 = new double[nSamplesTaken];     // new data buffer initialised with sample size
+        double* dataO1 = new double[nSamplesTaken];         // new data buffer initialised with sample size
         double* dataO2 = new double[nSamplesTaken];
         double* dataP7 = new double[nSamplesTaken];
         double* dataP8 = new double[nSamplesTaken];
@@ -143,24 +306,29 @@ void EmoController::processEEGdata(double desiredFreq, bool test)
 
         classifier->updateEEGData(dataO1, dataO2, dataP7, dataP8, nSamplesTaken);
 
-        if(classifier->isSSVEPpresent(desiredFreq))
-            cout << "SSVEP found!" << endl;             // >>>> This is where the brain switch turns on <<<<
+        totDetections++;
+        if(classifier->isSSVEPpresent(desiredFreq)) {
+            cout << "SSVEP found :-)" << endl;
+            positiveDetections++;
+        }             
         else
-            cout << "SSVEP not found" << endl;
+            cout << "SSVEP not found :-(" << endl;
 
 		delete[] dataO1;
         delete[] dataO2;
         delete[] dataP7;
         delete[] dataP8;
 	}
-    //cout << "=====================================================================" << endl;
 
     if(test)        // Called if we are using test data
     {
-        if(classifier->isSSVEPpresent(desiredFreq))
-            cout << "SSVEP found!" << endl;             
+        totDetections++;
+        if(classifier->isSSVEPpresent(desiredFreq)) {
+            cout << "SSVEP found :-)" << endl;          
+            positiveDetections++;
+        }
         else
-            cout << "SSVEP not found" << endl;
+            cout << "SSVEP not found :-(" << endl;
     }
 }
 
@@ -172,4 +340,107 @@ void EmoController::initChannels(int nNewSamples)
     {
         channels.push_back(new double[nNewSamples]);
     }
+}
+//Rudolf was here
+bool EmoController::LoadProfile()
+{
+	bool LoadSuccess = true ;
+
+	if (EE_LoadUserProfile(userID,"RudolfHoehler.emuy")!= EDK_OK)
+	{
+		cout << "FAILED! to Load Profile from FILE!";
+		LoadSuccess = false ;
+	}
+	else
+	{
+		cout << "Loaded Profile from FILE! GREAT SUCCESS";
+		
+	}
+			
+	if (EE_GetUserProfile(userID, eProfile) != EDK_OK) 
+	{
+		cout<< "Cound not load profile. \n";
+		LoadSuccess = false ;
+			
+	}
+	else
+	{
+		cout << "Got profile! \n";
+	}
+
+
+	unsigned int profileSize;
+		
+	if (EE_GetUserProfileSize(eProfile, &profileSize) != EDK_OK)
+	{
+		LoadSuccess = false ;
+
+	}
+	else
+	{
+		cout << "Got profile size! \n";
+	}
+
+	unsigned char* profileBuffer = NULL;
+	profileBuffer = 	new unsigned char[profileSize];
+
+		
+	if (EE_GetUserProfileBytes(eProfile, profileBuffer, profileSize)!= EDK_OK )
+	{
+		cout << "Failed to get profile! \n";
+		LoadSuccess = false ;
+
+	}
+	else
+	{
+		cout << "Succesfully got profile! \n";
+	}
+
+	if (EE_SetUserProfile(userID,profileBuffer, profileSize) != EDK_OK)
+	{
+		cout << "Failed to set profile! \n";
+		LoadSuccess = false ;
+
+	}
+	else
+	{
+		cout << "Succesfully set profile! \n";
+	}
+				
+	unsigned long   pTrainedActionsOut   ;
+
+	if (EE_CognitivGetTrainedSignatureActions  ( userID, &pTrainedActionsOut )!= EDK_OK)
+	{
+		cout << "Failed to get trained actions! \n";
+		LoadSuccess = false ;
+
+	}
+	else
+	{
+		cout << "Succesfully got trained actions! \n";
+		cout << "This user has trained for: \n";
+		float pActionSkillRatingOut ;
+
+	//	EE_CognitivGetActionSkillRating  ( 0, 0x0010, & pActionSkillRatingOut   ) ;
+
+		if( pTrainedActionsOut & 0x0001 ) cout <<" Neutral \n"; 
+        if( pTrainedActionsOut & 0x0002 ) cout <<" Push \n"; 
+        if( pTrainedActionsOut & 0x0004 ) cout <<" Pull \n"; 
+        if( pTrainedActionsOut & 0x0008 ) cout <<" Lift \n"; 
+        if( pTrainedActionsOut & 0x0010 ) cout <<" Drop \n"; 
+        if( pTrainedActionsOut & 0x0020 ) cout <<" Left \n";
+		if( pTrainedActionsOut & 0x0040 ) cout <<" Right \n";
+		if( pTrainedActionsOut & 0x0100 ) cout <<" Rotate Left \n";
+		if( pTrainedActionsOut & 0x0100 ) cout <<" Rotate Right \n";
+		if( pTrainedActionsOut & 0x0200 ) cout <<" Rotate Clockwise \n";
+		if( pTrainedActionsOut & 0x0400 ) cout <<" Rotate Counter Clockwise\n";
+		if( pTrainedActionsOut & 0x0800 ) cout <<" Rotate Forwards \n";
+		if( pTrainedActionsOut & 0x1000 ) cout <<" Rotate Reverse \n";
+		if( pTrainedActionsOut & 0x2000 ) cout <<" Disappear \n";
+				
+					
+	}
+
+	return LoadSuccess ;
+   
 }

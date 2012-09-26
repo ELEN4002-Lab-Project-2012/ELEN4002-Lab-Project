@@ -1,16 +1,10 @@
 #include "FFT.h"
 
-FFT::FFT(int complexSize, double freq):
-    samplingFreq(freq), 
-    freqRes(freq/complexSize),
-    plt("Spectrum"), 
-    fft(complexSize),
-    complexSpectrum(new Aquila::ComplexType[complexSize]),
-    complexFFTsize(complexSize),
-    absFFTsize(complexSize/2),                                         // Positive half
-    absSpectrum(new double[complexSize/2]),        
-    aveAbsSpectrum(new double[complexSize/2])   
+FFT::FFT(int complexSize, double freq, bool pad):
+    padded(pad), 
+    plt("Spectrum") 
 {
+    initFFT(complexSize, freq);
     // Zero the complex and absolute spectra
     zeroSpectrum();
     for(int i = 0; i != absFFTsize; i++)
@@ -20,18 +14,79 @@ FFT::FFT(int complexSize, double freq):
     }
 }
 
-void FFT::calcFFT(boost::shared_ptr<Signal> signal)
+void FFT::initFFT(int complexSize, double freq)
 {
-    fft.fft(signal->getEEGSignal(), complexSpectrum);
-    initAbsoluteSpectrum();
-    calcAbsAveSpectrum();                               // Calculate the average of 5 FFT spectra
+    if(padded) // Use zero padding
+    {
+        int padSize = complexSize*2;
+        samplingFreq = freq; 
+        freqRes = freq/padSize;
+        fft_ptr = boost::shared_ptr<Aquila::OouraFft>(new Aquila::OouraFft(padSize));
+        complexSpectrum = new Aquila::ComplexType[padSize];
+        complexFFTsize = padSize;
+        absFFTsize = padSize/2;                                         // Positive half
+        absSpectrum = boost::shared_array<double>(new double[padSize/2]);        
+        aveAbsSpectrum = boost::shared_array<double>(new double[padSize/2]);
+    }
+    else    // No zero padding
+    {
+        samplingFreq = freq; 
+        freqRes = freq/complexSize;
+        complexFFTsize = complexSize;
+        absFFTsize = complexSize/2;
+        absSpectrum = boost::shared_array<double>(new double[complexSize/2]);        
+        aveAbsSpectrum = boost::shared_array<double>(new double[complexSize/2]);
+        complexSpectrum = new Aquila::ComplexType[complexSize];
+        fft_ptr = boost::shared_ptr<Aquila::OouraFft>(new Aquila::OouraFft(complexSize));
+    }
 }
 
-void FFT::calcFFT(double* signal)
+void FFT::calcFFT(boost::shared_ptr<Signal> signal, int size)
 {
-    fft.fft(signal, complexSpectrum);
+    if(padded){
+        double* paddedSig = zeroPad(signal->getAveEEGSignal(), size);
+        fft_ptr->fft(paddedSig, complexSpectrum);
+        delete paddedSig;
+        paddedSig = NULL;
+    }
+    else
+        fft_ptr->fft(signal->getAveEEGSignal(), complexSpectrum);
+    
+    initAbsoluteSpectrum();
+    //calcAbsAveSpectrum();                               // Calculate the average of 5 FFT spectra
+}
+
+void FFT::calcFFT(double* signal, int size)
+{
+    if(padded) {
+        double* paddedSig = zeroPad(signal, size);
+        fft_ptr->fft(paddedSig, complexSpectrum);
+        delete paddedSig;
+        paddedSig = NULL;
+    }
+    else {
+        //cout << "Signal size = " << size << "; Complex spectrum size = " << complexFFTsize << endl;
+        fft_ptr->fft(signal, complexSpectrum);
+    }
+    
     initAbsoluteSpectrum();
     //calcAbsAveSpectrum();
+}
+
+double* FFT::zeroPad(double* signal, int sampleSize)
+{
+    // Remember that the padded size = complexFFTsize now
+    double* paddedSignal = new double[complexFFTsize];     // Temp variable to store padded signal
+        
+    // Copy existing elements. I had to use pointer arrays because Emotiv does. Is there another way to append zeroes?
+    for(int i = 0; i != sampleSize; i++)
+        paddedSignal[i] = signal[i];
+
+    // Add new zeros to the end
+    for(int i = sampleSize; i != complexFFTsize; i++)
+        paddedSignal[i] = 0;
+
+    return paddedSignal;
 }
 
 void FFT::calcAbsAveSpectrum()
@@ -93,17 +148,6 @@ double FFT::getSpectrumMaxInRange(double f1, double f2)
 
     return getSpectrumMaxInRange(n1, n2);
 }
-
-    /*if (n > absFFTsize || n < 0)
-        cerr << "Lower frequency not in range: index = " << n << endl;
-    else
-        n1 = n;*/
-
-    /*if(n > absFFTsize || n < 0) {
-        cerr << "Higher frequency not in range: index = " << n << endl;
-    }
-    else
-        n2 = n;*/
 
 double FFT::getSpectrumAverage()
 {

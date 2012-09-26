@@ -1,21 +1,22 @@
 #include "MECclassifier.h"
 
-MECclassifier::MECclassifier(int size, double sampleFreq, int numChannels):
+MECclassifier::MECclassifier(int size, double sampleFreq, int numChannels, bool padding, Aquila::WindowType window):
     sampleSize(size),
     samplingFreq(sampleFreq),
     freqRes(sampleFreq/size),
     counter(0),
     nChannels(numChannels),
     Y(size, numChannels),            // Nt x Ny
-    swFFT(size, sampleFreq)
+    swFFT(size, sampleFreq, padding),
+    windowFunction(window)
 {
     // Initialise the channels
     for(int i = 0; i != nChannels; i++)
     {
-        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq));
+        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq, window));
         channels.push_back(signal_ptr);
     }
-    cout << "MEC classifier instantiated" << endl;
+    //cout << "MEC classifier instantiated" << endl;        // #################
 }
 
 bool MECclassifier::isSSVEPpresent(double desiredFreq)
@@ -52,7 +53,7 @@ void MECclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7
     channels.at(3)->updateSignal(dataP8, nSamplesTaken);
 
     for(int i = 0; i != nChannels; i++) {
-        channels.at(i)->averageSignal();         // Average the signal for each channel
+        channels.at(i)->processSignal();         // Average and window the signal for each channel
     }
 
     for(int i = 0; i != sampleSize; i++) {       // Fill the Y matrix with data.
@@ -67,15 +68,41 @@ void MECclassifier::loadTestData()
 {
     // Initialise signal data
     for(int i = 0; i != nChannels; i++) {
+        ;
         channels.at(i)->loadTestData();
+        channels.at(i)->processSignal();
     }
     // Initialise Y matrix
     for(int i = 0; i != sampleSize; i++) {       // Fill the Y matrix with data.
         for(int j = 0; j != nChannels; j++) {
-            Y(i, j) = channels.at(j)->getEEGSignal()[i];
+            Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
-    //cout << "Y = " << endl << Y << endl;
+    
+    /*cout << endl << "SAMPLE SIZE = " << sampleSize << endl;
+    srand((unsigned)time(0));                           // Seed random number generator
+    double* signal1 = new double[sampleSize];
+    double* signal2 = new double[sampleSize];
+    double* signal3 = new double[sampleSize];
+    double* signal4 = new double[sampleSize];
+    double testFreq = 15;
+    const double dt = 1.0/samplingFreq; 
+
+    for (std::size_t i = 0; i != sampleSize; ++i)
+    {  
+        signal1[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*2*i*dt) + 0.6*sin(2*PI*11*i*dt) + 0.5*sin(2*PI*18*i*dt);
+        signal2[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*3*i*dt) + 0.4*sin(2*PI*7*i*dt) + 0.6*sin(2*PI*19*i*dt);
+        signal3[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*4*i*dt) + 0.5*sin(2*PI*8*i*dt) + 0.5*sin(2*PI*21*i*dt);
+        signal4[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.3*sin(2*PI*5*i*dt) + 0.4*sin(2*PI*12*i*dt) + 0.4*sin(2*PI*17*i*dt);
+    }
+    mat Y(sampleSize, nChannels);
+    for(int i = 0; i != sampleSize; i++) {       // Fill the Y matrix with data.
+        Y(i, 0) = signal1[i];
+        Y(i, 1) = signal2[i];
+        Y(i, 2) = signal3[i];
+        Y(i, 3) = signal4[i];
+    }
+    cout << "Y = " << endl << Y << endl;*/
 }
 
 bool MECclassifier::detectTargetFreq(double f)
@@ -85,28 +112,28 @@ bool MECclassifier::detectTargetFreq(double f)
     // If there is one positive detection for any phase => +ve detection
     for(int i = 0; i != 4; i++)
     {
-        mat Sw = findWeightedSignal(f, i*phaseShift);       // Find the new weighted signal
-        cout << "X phaseshift = " << i*phaseShift << endl;
-        double* SwArray = new double[sampleSize];           // Transform it into a double* array
+        mat Sw = findWeightedSignal(f, i*phaseShift);               // Find the new weighted signal
+        //cout << "X phaseshift = " << i*phaseShift << endl;       
+        double* SwArray = new double[sampleSize];                   // Transform it into a double* array
         for(int i = 0; i != sampleSize; i++)
             SwArray[i] = Sw(i, 0);
 
-        swFFT.calcFFT(SwArray);
+        swFFT.calcFFT(SwArray, sampleSize);
 
         // Equation 11 -------
         double upper = swFFT.getSpectrumMaxInRange(f-0.1*f, f+0.1*f);               // At f
         double lower = swFFT.getSpectrumMaxInRange(8.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
         double R = upper/lower;
-        cout << "R = " << R << endl;
-
-        if(i == 0) 
-            swFFT.printSpectrumCSV();               // NB printing to test output
+        cout << "R = " << R << ". ";             
+        Rvalues.push_back(R);
 
         swFFT.zeroSpectrum();                       // Don't forget to zero everything (Aquilla's problem!)
         delete SwArray;                             // Clean up memory before returning
-
-        if (R > 0.95)                               // May have to change this if R is not precise
+        swFFT.printSpectrumCSV();
+        if (R > 0.95){                              // May have to change this if R is not precise
+                           // NB printing to test output
             return true;
+        }
         else
             return false;
     }  
@@ -140,11 +167,12 @@ mat MECclassifier::findWeightedSignal(double fundamentalFreq, const double phase
     mat eigval = abs(eigval_complex);
 
     uvec indices = sort_index(eigval);                      // Indices of old matrix in new sorted order. 
-    eigval = sort(eigval, 0);                               // Sort eigvalues in ascending order
+    eigval = sort(eigval);                                  // Sort eigvalues in ascending order
 
+    cx_mat temp = eigvec;
     for(int col = 0; col != eigvec.n_cols; col++) {         // Arrange eigvectors in corresponding order
         for (int row = 0; row != eigvec.n_rows; row++) {
-            eigvec(row, col) = eigvec(row, indices(col));
+            eigvec(row, col) = temp(row, indices(col));
         }
     }
 
