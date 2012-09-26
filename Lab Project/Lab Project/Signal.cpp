@@ -93,7 +93,7 @@ void Signal::zeroPadSignal()
 }
 
 // This function closely approximates a low pass filter filter to eliminate DC offsets.  
-/*void Signal::highPassFilter(double *x, int size)
+void Signal::highPassFilter(double *x, int size)
 {
     counter++;
     if(counter > 3)     // Wait till the fourth sample
@@ -105,10 +105,10 @@ void Signal::zeroPadSignal()
         for (int i = 0; i != size; ++i)
             x[i] -= windowAverage;
     }
-}*/
+}
 
 // Apply a high pass filter to the data
-void Signal::highPassFilter(double *x, const int size)
+/*void Signal::highPassFilter(double *x, const int size)
 {
     // Calculate the FFT
     Aquila::OouraFft fft(size);
@@ -132,7 +132,7 @@ void Signal::highPassFilter(double *x, const int size)
 
     delete spectrum; delete filterSpectrum; // Free up memory
     spectrum = NULL; filterSpectrum = NULL;
-}
+}*/
 
 
 // Note that this is the average of UNPADDED signal. Important to call BEFORE padding

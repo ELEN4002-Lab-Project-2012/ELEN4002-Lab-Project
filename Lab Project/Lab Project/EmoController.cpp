@@ -190,7 +190,7 @@ void EmoController::loop()
 
 
 					HANDLE pipe = CreateFile(
-						L"\\\\.\\pipe\\EEG_DATA_PIPE",
+						"\\\\.\\pipe\\EEG_DATA_PIPE",
 						GENERIC_WRITE, // only need write access
 						FILE_SHARE_READ | FILE_SHARE_WRITE,
 						NULL,

@@ -66,6 +66,7 @@ class AllegroFlasher: public Runnable
 {
 public:
 	AllegroFlasher(const int w, const int h);
+    AllegroFlasher(const AllegroFlasher& flash);
     virtual void run();
 	InitializationStatus AllegroInit();
 	void DestroyAllegro();
@@ -77,6 +78,10 @@ public:
     virtual ~AllegroFlasher();
     void initFlasher(double freq, double time, int cycle, int pattern, bool startWithBlank);
     void initFlasher(vector<double> freq, double time, int cycle, int pattern, bool startWithBlank);
+    void resizeFlashingBlock(int height, int width);    // Resize the flashing block inside the window
+    void resizeWindow(int height, int width);           // Resize the Allegro Window
+    void positionWindow(int x, int y);                  // Top left corner of the windows
+    void moveBlock(EVENT direction);                    // For cognitive actions
 
 private:
     void updateDisplay();
@@ -86,6 +91,10 @@ private:
     bool done;
     int width;
 	int height;
+    int blockWidth;
+    int blockHeight;
+    int xOffset;
+    int yOffset;
     vector<double> FPS;
     vector<int> frames;
 

@@ -23,7 +23,7 @@
 
 typedef boost::shared_ptr<SSVEPclassifier> Classifier;
 
-#pragma comment(lib, "../lib/edk.lib")   // Refer linker to the lib folder. 
+//#pragma comment(lib, "../lib/edk.lib")   // Refer linker to the lib folder. 
 using namespace std;
 using namespace arma;
 

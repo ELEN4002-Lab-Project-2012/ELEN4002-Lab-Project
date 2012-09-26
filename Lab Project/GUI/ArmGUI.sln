@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArmGUI", "ArmGUI.vcxproj", "{CA11EDBF-377E-45B1-9CEB-1D94D9080729}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA11EDBF-377E-45B1-9CEB-1D94D9080729}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CA11EDBF-377E-45B1-9CEB-1D94D9080729}.Debug|Win32.Build.0 = Debug|Win32
+		{CA11EDBF-377E-45B1-9CEB-1D94D9080729}.Release|Win32.ActiveCfg = Release|Win32
+		{CA11EDBF-377E-45B1-9CEB-1D94D9080729}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -10,6 +10,6 @@
 #include <string.h>
 #include "OWI535.h"
 
-#include "../../ELEN4002-Lab-Project/Lab Project/Lab Project/eegTxRxData.h"
+#include "../Lab Project/eegTxRxData.h"
 
 // TODO: reference additional headers your program requires here

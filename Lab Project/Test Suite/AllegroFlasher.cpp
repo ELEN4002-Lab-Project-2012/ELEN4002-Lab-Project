@@ -8,6 +8,7 @@ AllegroFlasher::AllegroFlasher(const int w, const int h):
 	event_queue(NULL),
 	timer(NULL),
     display(NULL),
+    xOffset(0), yOffset(0),
 	mouse_xpos(0),
 	mouse_ypos(0),
     done(false),
@@ -19,6 +20,11 @@ AllegroFlasher::AllegroFlasher(const int w, const int h):
 		throw initialisation_status;
 	}
 }
+
+/*AllegroFlasher::AllegroFlasher(const AllegroFlasher& flash)
+{
+
+}*/
 
 void AllegroFlasher::initFlasher(double freq, double time, int cycle, int pattern, bool startWithBlank)
 {
@@ -55,14 +61,52 @@ void AllegroFlasher::initFlasher(vector<double> freqs, double time, int cycle, i
     //frames = 2*freq*time;
 }
 
+void AllegroFlasher::moveBlock(EVENT direction)
+{
+    switch(direction)
+    {
+        case UP:
+            yOffset -= 10; break;
+        case DOWN:
+            yOffset += 10; break;
+        case RIGHT:
+            xOffset += 10; break;
+        case LEFT:
+            xOffset -= 10; break;
+        default:
+            cout << "Invalid block movement" << endl; break;
+    }
+}
+
+void AllegroFlasher::resizeFlashingBlock(int height, int width)
+{
+    blockWidth = width;
+    blockHeight = height;
+}
+
+void AllegroFlasher::resizeWindow(int h, int w) 
+{
+    height = h;
+    width = w;
+}
+
+void AllegroFlasher::positionWindow(int x, int y)
+{
+    al_set_new_window_position(x, y);
+}
+
+
 void AllegroFlasher::run()
 {
     const int zero = 0;
 
     timer = al_create_timer(1.0 / FPS.at(zero));
     display = al_create_display(width, height);
+    event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_register_event_source(event_queue, al_get_mouse_event_source());
     al_start_timer(timer);		        // Start the timer
 
     int counter = 0;
@@ -75,11 +119,23 @@ void AllegroFlasher::run()
             break;
         }
         else if (Event == UPDATE) {     // A timer event 
-            if(useBlankStart && counter < frames.at(zero)/3)
+            if(useBlankStart && counter < frames.at(zero)/2)
                 displayBlankScreen();   // Simply display a black screen
             else
                 updateDisplay();
             counter++;
+        }
+        else if (Event == UP) {
+            moveBlock(UP);
+        }
+        else if (Event == DOWN) {
+            moveBlock(DOWN);
+        }
+        else if (Event == LEFT) {
+            moveBlock(LEFT);
+        }
+        else if (Event == RIGHT) {
+            moveBlock(RIGHT);
         }
 
         if(counter == frames.at(zero))
@@ -87,12 +143,13 @@ void AllegroFlasher::run()
     }
     al_destroy_timer(timer);
 	al_destroy_display(display);
+    al_destroy_event_queue(event_queue);
     done = false;                       // Set again for the next time
 }
 
 AllegroFlasher::~AllegroFlasher()
 {
-	al_destroy_event_queue(event_queue);
+	//al_destroy_event_queue(event_queue);
 	//al_destroy_timer(timer);
 	//al_destroy_display(display);						//destroy our display object
 }
@@ -127,7 +184,7 @@ InitializationStatus AllegroFlasher::AllegroInit()
 	//reserve samples
 	if (!al_reserve_samples(5)) return RESERVE_SAMPLES_ERROR;
 
-	event_queue = al_create_event_queue();
+	//event_queue = al_create_event_queue();
     
     //display = al_create_display(width, height);
     //if(!display)
@@ -136,8 +193,8 @@ InitializationStatus AllegroFlasher::AllegroInit()
 	//timer = al_create_timer(1.0 / FPS);	    // Set the period of the time
 
 	// Register keyboard input, mouse input, display input, and timer as event source on event_queue
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
-	al_register_event_source(event_queue, al_get_mouse_event_source());
+	//al_register_event_source(event_queue, al_get_keyboard_event_source());
+	//al_register_event_source(event_queue, al_get_mouse_event_source());
     
 	//al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	
@@ -276,13 +333,15 @@ void AllegroFlasher::updateDisplay()
 	{
 		if (ColorIndex > 0)
 		{
-			al_draw_filled_rectangle(0, 0, width, height, al_map_rgb(255,255,255));
-			ColorIndex =0 ;
+			//al_draw_filled_rectangle(width/4 + xOffset, height/4 + yOffset, width*3/4 + xOffset, height*3/4 + yOffset, al_map_rgb(255,255,255));
+			al_draw_filled_rectangle(0 + xOffset, 0 + yOffset, width + xOffset, height + yOffset, al_map_rgb(255,255,255));
+            ColorIndex = 0;
 		}
 		else
 		{
 			ColorIndex = 1;
-			al_draw_filled_rectangle(0, 0, width, height, al_map_rgb(0,0,0));
+			al_draw_filled_rectangle(0 + xOffset, 0 + yOffset, width + xOffset, height + yOffset, al_map_rgb(0,0,0));
+            //al_draw_filled_rectangle(width/4 + xOffset, height/4 + yOffset, width*3/4 + xOffset, height*3/4 + yOffset, al_map_rgb(0,0,0));
 		}
 	}
 	else if ((PatternIndex == 1) && (CycleIndex == 0))
