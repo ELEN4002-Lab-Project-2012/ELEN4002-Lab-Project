@@ -20,24 +20,46 @@ AllegroFlasher::AllegroFlasher(const int w, const int h):
 	}
 }
 
-void AllegroFlasher::initFlasher(double freq, double time)
+void AllegroFlasher::initFlasher(double freq, double time, int cycle, int pattern, bool startWithBlank)
 {
-    //Get User Info
-	cout << "Welcome to an Epileptic fit." << endl;
-	cout << "Full Cycle [0] or Half Cycle [1]: ";
-	//cin >> CycleIndex;
-    CycleIndex = 0;
-	cout << "Full Screen [0], Horizontal Pillars [1], Checkered Board [2]: ";
-	//cin >> PatternIndex;
-    PatternIndex = 0;
-    FPS = 2*freq,
-    cout << "Frequency (Hz): " << FPS/2 << endl;
-    frames = 2*freq*time;
+    if(startWithBlank)
+        useBlankStart = true;
+    else
+        useBlankStart = false;
+
+    FPS.clear(); frames.clear();
+    CycleIndex = cycle;         // Full Cycle [0] or Half Cycle [1]
+    PatternIndex = pattern;     // Full Screen [0], Horizontal Pillars [1], Checkered Board [2]
+    FPS.push_back(2*freq);
+    frames.push_back(2*freq*time);
+    //cout << "Allegro Frequency (Hz): " << FPS/2 << endl;
+}
+
+void AllegroFlasher::initFlasher(vector<double> freqs, double time, int cycle, int pattern, bool startWithBlank)
+{
+    if(startWithBlank)
+        useBlankStart = true;
+    else
+        useBlankStart = false;
+
+    FPS.clear(); frames.clear();
+    CycleIndex = cycle;         // Full Cycle [0] or Half Cycle [1]
+    PatternIndex = pattern;     // Full Screen [0], Horizontal Pillars [1], Checkered Board [2]
+    
+    for(int i = 0; i != freqs.size(); i++)
+    {
+        FPS.push_back(2*freqs.at(i));
+        frames.push_back(2*freqs.at(i)*time);
+    }
+    //cout << "Allegro Frequency (Hz): " << FPS/2 << endl;
+    //frames = 2*freq*time;
 }
 
 void AllegroFlasher::run()
 {
-    timer = al_create_timer(1.0 / FPS);
+    const int zero = 0;
+
+    timer = al_create_timer(1.0 / FPS.at(zero));
     display = al_create_display(width, height);
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -49,15 +71,18 @@ void AllegroFlasher::run()
         EVENT Event = EventType();      // Wait for an event to occur
 
         if (Event == ESCAPE) {			// Quit the program
-		    counter = frames; 
+            counter = frames.at(zero); 
             break;
         }
         else if (Event == UPDATE) {     // A timer event 
-            updateDisplay();
+            if(useBlankStart && counter < frames.at(zero)/3)
+                displayBlankScreen();   // Simply display a black screen
+            else
+                updateDisplay();
             counter++;
         }
 
-        if(counter == frames)
+        if(counter == frames.at(zero))
             done = true;
     }
     al_destroy_timer(timer);
@@ -238,6 +263,11 @@ bool AllegroFlasher::eventQueueIsEmpty()
 		return true;
 	else
 		return false;
+}
+
+void AllegroFlasher::displayBlankScreen()
+{
+    al_clear_to_color(al_map_rgb(255,255,255));
 }
 
 void AllegroFlasher::updateDisplay()

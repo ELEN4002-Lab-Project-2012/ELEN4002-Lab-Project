@@ -10,10 +10,12 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <iostream>
+#include <vector>
 #include <string>
 #include "Runnable.h"
 using std::cin;
 using std::cout;
+using std::vector;
 
 //! Class Allegro.h
 
@@ -73,18 +75,19 @@ public:
 	double getMouseXPos(){return mouse_xpos;};
 	double getMouseYPos(){return mouse_ypos;};
     virtual ~AllegroFlasher();
-    void initFlasher(double freq, double time);
+    void initFlasher(double freq, double time, int cycle, int pattern, bool startWithBlank);
+    void initFlasher(vector<double> freq, double time, int cycle, int pattern, bool startWithBlank);
 
 private:
     void updateDisplay();
-    
+    void displayBlankScreen();
     int PatternIndex, CycleIndex, CycleCounter, ColorIndex;
-
+    bool useBlankStart;
     bool done;
-    int FPS;
-    unsigned int frames;
     int width;
 	int height;
+    vector<double> FPS;
+    vector<int> frames;
 
 	ALLEGRO_EVENT_QUEUE *event_queue;
 	ALLEGRO_TIMER *timer;
