@@ -13,7 +13,7 @@ using namespace std;
 class SSVEPclassifier
 {
 public:
-    virtual bool isSSVEPpresent(double desiredFreq) = 0;
+    virtual double calculateRatio(double desiredFreq) = 0;
     virtual void updateEEGData(double*, double*, double*, double*, int) = 0;
     virtual void loadTestData() = 0;
 

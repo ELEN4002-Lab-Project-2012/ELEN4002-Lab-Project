@@ -2,39 +2,43 @@
 
 // Global variables for testing purposes
 bool testComplete;
-vector<double> accuracy;
 
 EmoController::EmoController(int numChannels):      
     nChannels(numChannels),
     delayTime(200)              // Default d = 200ms
-{
+{   
     initEmotiv();
     connectEmoEngine();
 }
 
 // The classifier is instantiated and connected to Emotiv once. 
 // Thereafter, this function must be called to initialise the classifier for each test type
-void EmoController::initClassifier(Classifier myClassifier, double detectionFreq, bool isTest)    
+void EmoController::initClassifier(Classifier myClassifier, Monitor myMonitor, double detectionFreq, bool isTest)    
 {
     classifier = myClassifier;
+    monitor = myMonitor;
+    testComplete = false;
     SSVEPfreqs.clear();
     SSVEPfreqs.push_back(detectionFreq);
     test = isTest;
-    totDetections = 0;
-    positiveDetections = 0;
-    accuracy.clear(); 
+    totDetections.push_back(0);
+    positiveDetections.push_back(0); 
 }
 
 // Override
-void EmoController::initClassifier(Classifier myClassifier, vector<double> detectionFreqs, bool isTest)
+void EmoController::initClassifier(Classifier myClassifier, Monitor myMonitor, vector<double> detectionFreqs, bool isTest)
 {
     classifier = myClassifier;
+    monitor = myMonitor;            //Monitor(new SSVEPMonitor(detectionFreqs));
+    testComplete = false;
     SSVEPfreqs.clear();
     SSVEPfreqs = detectionFreqs;
-    test = isTest;
-    totDetections = 0;
-    positiveDetections = 0;
-    accuracy.clear(); 
+    test = isTest; 
+    //accuracy.clear();
+    for(int i = 0; i != SSVEPfreqs.size(); i++) {
+        totDetections.push_back(0);
+        positiveDetections.push_back(0);
+    }
 }
 
 // Virtual Runnable function. This is where the thread starts execution.
@@ -127,209 +131,176 @@ void EmoController::loop()
         cout << "Loaded test data" << endl;
     }
     
-    //cout << "Start receiving EEG Data! Press any key to stop logging...\n" << endl;
-    EE_DataSetBufferSizeInSec(secs);		                // Initialise the data buffer size in seconds
+    EE_DataSetBufferSizeInSec(secs);		            // Initialise the data buffer size in seconds
 
-    for(int i = 0; i != SSVEPfreqs.size(); i++)             // Outer loop for multiple frequencies
+    // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread  
+    while (!testComplete) 
     {
-        // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread
-        while (!testComplete ) 
-		{
-			//|| !_kbhit() - Try having Keyboard Inhibit function with an OR Tests
-		    
-			state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
+		state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
 
-		    if (state == EDK_OK) 
-			{						    // Operation has been carried out successfully (no error)
+		if (state == EDK_OK)                            // Operation has been carried out successfully (no error)
+		{						    
+			EE_Event_t eventType = EE_EmoEngineEventGetType(eEvent);
+			EE_EmoEngineEventGetUserId(eEvent, &userID);
 
-			    EE_Event_t eventType = EE_EmoEngineEventGetType(eEvent);
-			    EE_EmoEngineEventGetUserId(eEvent, &userID);
-
-			    // Log the EmoState if it has been updated
-			switch (eventType) 
-				{
-				case EE_UserAdded:				
-					{			// Note that an EE_UserAdded event is created soon after EE_EngineConnect
+			// Log the EmoState if it has been updated
+		    switch (eventType) 
+		    {
+			    case EE_UserAdded:				
+			    {			// Note that an EE_UserAdded event is created soon after EE_EngineConnect
 				    std::cout << "User added" << endl << endl;
 				    EE_DataAcquisitionEnable(userID,true);	// Enable data acquisition
 				    readytocollect = true;					// Once a user has been added, read to collect data
-			    
-				
-				if (!LoadProfile())
-					{
-						std::cout << "++==Loading of user profile Failed!==++ \n";
-						std::cout << "Trying to do any cognitive stuff will fail stupidly! \n";
-						
-					}
-						for(int a=0; a < 10 ; a++)
-						{
-							cout << "*";
-							Sleep(200);
+				    if (!LoadProfile())
+					    {
+						    std::cout << "++==Loading of user profile Failed!==++ \n";
+						    std::cout << "Trying to do any cognitive stuff will fail stupidly! \n";	
+					    }
+						    for(int a=0; a < 10 ; a++)
+						    {
+							    cout << "*";
+							    Sleep(200);
+						    }
+						    cout << "\n" ;    
+				    }
+			    case EE_EmoStateUpdated:
+			    {	
+				    EE_EmoEngineEventGetEmoState(eEvent, eState); 
 
-						}
-						cout << "\n" ;
-			         
-				}
-				case EE_EmoStateUpdated:
-				{	
-					EE_EmoEngineEventGetEmoState(eEvent, eState); 
+				    EE_CognitivAction_t actionType;
+				    actionType = ES_CognitivGetCurrentAction(eState);
+				    float actionPower;
+				    actionPower = ES_CognitivGetCurrentActionPower(eState);
 
-					EE_CognitivAction_t actionType;
-					actionType = ES_CognitivGetCurrentAction(eState);
-					float actionPower;
-					actionPower = ES_CognitivGetCurrentActionPower(eState);
+				    if  (COG_NEUTRAL  == ES_CognitivGetCurrentAction(eState) )	cout << "NEUTRAL! \n";
+				    if  (COG_LIFT  == ES_CognitivGetCurrentAction(eState) )	cout << "LIFTING! \n";
+				    if  ( COG_PUSH == ES_CognitivGetCurrentAction(eState) )	cout << "PUSHING ! \n";
+				    if  (COG_PULL  == ES_CognitivGetCurrentAction(eState) )	cout << "PULLING ! \n";
+				    if  ( COG_DROP   == ES_CognitivGetCurrentAction(eState) )	cout << "DROPPING ! \n";
+				    if  ( COG_LEFT == ES_CognitivGetCurrentAction(eState) )	cout << "LEFT ! \n";
 
-					if  (COG_NEUTRAL  == ES_CognitivGetCurrentAction(eState) )	cout << "NEUTRAL! \n";
-					if  (COG_LIFT  == ES_CognitivGetCurrentAction(eState) )	cout << "LIFTING! \n";
-					if  ( COG_PUSH == ES_CognitivGetCurrentAction(eState) )	cout << "PUSHING ! \n";
-					if  (COG_PULL  == ES_CognitivGetCurrentAction(eState) )	cout << "PULLING ! \n";
-					if  ( COG_DROP   == ES_CognitivGetCurrentAction(eState) )	cout << "DROPPING ! \n";
-					if  ( COG_LEFT == ES_CognitivGetCurrentAction(eState) )	cout << "LEFT ! \n";
-
-						
-
-
-					HANDLE pipe = CreateFile(
-						"\\\\.\\pipe\\EEG_DATA_PIPE",
-						GENERIC_WRITE, // only need write access
-						FILE_SHARE_READ | FILE_SHARE_WRITE,
-						NULL,
-						OPEN_EXISTING,
-						FILE_ATTRIBUTE_NORMAL,
-						NULL
-					);
-					DWORD OhCrap;
-					if (pipe == INVALID_HANDLE_VALUE) {
-						wcout << "Failed to connect to pipe." << endl;
-						// look up error code here using GetLastError()
+				    HANDLE pipe = CreateFile(
+					    "\\\\.\\pipe\\EEG_DATA_PIPE",
+					    GENERIC_WRITE, // only need write access
+					    FILE_SHARE_READ | FILE_SHARE_WRITE,
+					    NULL,
+					    OPEN_EXISTING,
+					    FILE_ATTRIBUTE_NORMAL,
+					    NULL
+				    );
+				    DWORD OhCrap;
+				    if (pipe == INVALID_HANDLE_VALUE) {
+					    wcout << "Failed to connect to pipe." << endl;
+					    // look up error code here using GetLastError()
 							
-							OhCrap = GetLastError();
+						    OhCrap = GetLastError();
 						
-					}
-					else
-					{
-						//string strData;
-						//strData = "Rudolf";
+				    }
+				    else
+				    {
+					    //string strData;
+					    //strData = "Rudolf";
 
-						//populate eegDATA IF the pipe could be created, otherwise, why bother?
-						eegTxRxData currentEEGdata(
-							ES_CognitivGetCurrentAction(eState),
-							ES_CognitivGetCurrentActionPower(eState),
-							ES_CognitivIsActive(eState),
-							ES_GetContactQuality(eState,EE_CHAN_O1),
-							ES_GetContactQuality(eState,EE_CHAN_O2),
-							ES_GetContactQuality(eState,EE_CHAN_P7 ),
-							ES_GetContactQuality(eState,EE_CHAN_P8 ),
-							ES_GetHeadsetOn(eState)
-							);
+					    //populate eegDATA IF the pipe could be created, otherwise, why bother?
+					    eegTxRxData currentEEGdata(
+						    ES_CognitivGetCurrentAction(eState),
+						    ES_CognitivGetCurrentActionPower(eState),
+						    ES_CognitivIsActive(eState),
+						    ES_GetContactQuality(eState,EE_CHAN_O1),
+						    ES_GetContactQuality(eState,EE_CHAN_O2),
+						    ES_GetContactQuality(eState,EE_CHAN_P7 ),
+						    ES_GetContactQuality(eState,EE_CHAN_P8 ),
+						    ES_GetHeadsetOn(eState)
+						    );
 				
-						//Serialize
-						std::stringstream MyStringStream ;
-						boost::archive::text_oarchive oa(MyStringStream);
-						// write class instance to archive
-						oa << currentEEGdata;
-						DWORD numBytesWritten = 0;
-						BOOL result = WriteFile(
-							pipe, // handle to our outbound pipe
-							MyStringStream.str().c_str(), // data to send
-							MyStringStream.str().length(), // length of data to send (bytes)
-							&numBytesWritten, // will store actual amount of data sent
-							NULL // not using overlapped IO
-							);
+					    //Serialize
+					    std::stringstream MyStringStream ;
+					    boost::archive::text_oarchive oa(MyStringStream);
+					    // write class instance to archive
+					    oa << currentEEGdata;
+					    DWORD numBytesWritten = 0;
+					    BOOL result = WriteFile(
+						    pipe, // handle to our outbound pipe
+						    MyStringStream.str().c_str(), // data to send
+						    MyStringStream.str().length(), // length of data to send (bytes)
+						    &numBytesWritten, // will store actual amount of data sent
+						    NULL // not using overlapped IO
+						    );
+					    CloseHandle(pipe);
+				    }		
+					    break;
+			    }
 
-
-						CloseHandle(pipe);
-					}
-
-
-						
-						break;
-				}
-
-					// Handle Cognitiv training related event
-				case EE_CognitivEvent:
-				{
-						std::cout << "COGNITIVE EVENT";
-						//handleCognitivEvent(std::cout, eEvent);
-						break;
-				}
-					default:
-						break;
-				}
+				    // Handle Cognitiv training related event
+			    case EE_CognitivEvent:
+			    {
+				    std::cout << "COGNITIVE EVENT";
+				    //handleCognitivEvent(std::cout, eEvent);
+				    break;
+			    }
+			    default:
+				    break;
 			}
-			
-
-            // Process raw EEG data...
-		    if (readytocollect) {
-                processEEGdata(SSVEPfreqs.at(i), test);
-		    }
-
-		    Sleep(delayTime);
-	    }
-        // Note that accuracy will be exactly the same size as SSVEPfreqs
-        // Note that we take totDetections-2 to allow time for initialisation 
-        accuracy.push_back(((double)positiveDetections/(double)(totDetections-2))*100);
-
+        }
+        if (readytocollect) {
+            vector<double> Ratios;
+		    for(int i = 0; i != SSVEPfreqs.size(); i++) 
+            {	
+                // Process raw EEG data. Return a ratio for each of the multiple frequencies.
+                cout << "Frequency = " << SSVEPfreqs.at(i) << ": ";
+                Ratios.push_back(processEEGdata(SSVEPfreqs.at(i), test));
+                cout << "Ratio = " << Ratios.at(i) << endl;
+            }
+            // >>>>>>>>> HERE IS THE STRUCT <<<<<<<<<<<<
+            FreqDetections detections;  // Struct storing bools for each frequency
+            detections = monitor->monitorSSVEPDetections(Ratios, 0.95);     // SPECIFY THRESHOLD 0.95
+		}
+		Sleep(delayTime);
 	}
     testComplete = false;
 }
 
-void EmoController::processEEGdata(double desiredFreq, bool test)
+double EmoController::processEEGdata(double desiredFreq, bool test)
 {    
-    // Note that the developer’s application should access the EEG
-	// data at a rate that will ensure the sample buffer is not overrun.
-    // Ready the latest buffered data for access via the hData handle
-    // All data captured since the last call to DataUpdateHandle will be retrieved.
-	EE_DataUpdateHandle(0, hData);		
-
-	unsigned int nSamplesTaken=0;                            // Number of NEW samples
-                        
-    // Establish the buffer size
-    // The number of samples can be used to set up a buffer for retrieval into your application as shown
-	EE_DataGetNumberOfSample(hData,&nSamplesTaken);
-		
-	std::cout << "Updated with " << nSamplesTaken << " samples. ";
-
-	if (nSamplesTaken != 0 ) {
-                
-        cout << "Updating data" << endl;
-        // ED_P7, ED_O1, ED_O2, ED_P8. For now this is just hard coded
-        double* dataO1 = new double[nSamplesTaken];         // new data buffer initialised with sample size
-        double* dataO2 = new double[nSamplesTaken];
-        double* dataP7 = new double[nSamplesTaken];
-        double* dataP8 = new double[nSamplesTaken];
-                
-        EE_DataGet(hData, ED_O1, dataO1, nSamplesTaken);
-        EE_DataGet(hData, ED_O2, dataO2, nSamplesTaken);
-        EE_DataGet(hData, ED_P7, dataP7, nSamplesTaken);
-        EE_DataGet(hData, ED_P8, dataP8, nSamplesTaken);
-
-        classifier->updateEEGData(dataO1, dataO2, dataP7, dataP8, nSamplesTaken);
-
-        totDetections++;
-        if(classifier->isSSVEPpresent(desiredFreq)) {
-            cout << "SSVEP found :-)" << endl;
-            positiveDetections++;
-        }             
-        else
-            cout << "SSVEP not found :-(" << endl;
-
-		delete[] dataO1;
-        delete[] dataO2;
-        delete[] dataP7;
-        delete[] dataP8;
-	}
-
-    if(test)        // Called if we are using test data
+    if(!test)
     {
-        totDetections++;
-        if(classifier->isSSVEPpresent(desiredFreq)) {
-            cout << "SSVEP found :-)" << endl;          
-            positiveDetections++;
+        // Note that the developer’s application should access the EEG
+        // data at a rate that will ensure the sample buffer is not overrun.
+        // Ready the latest buffered data for access via the hData handle
+        // All data captured since the last call to DataUpdateHandle will be retrieved.
+        EE_DataUpdateHandle(0, hData);		
+
+        unsigned int nSamplesTaken=0;                            // Number of NEW samples
+                        
+        // Establish the buffer size
+        // The number of samples can be used to set up a buffer for retrieval into your application as shown
+        EE_DataGetNumberOfSample(hData,&nSamplesTaken);
+		
+        std::cout << "Updated with " << nSamplesTaken << " samples. ";
+
+        if (nSamplesTaken != 0 ) {
+                
+            cout << "Updating data" << endl;
+            // ED_P7, ED_O1, ED_O2, ED_P8. For now this is just hard coded
+            double* dataO1 = new double[nSamplesTaken];         // new data buffer initialised with sample size
+            double* dataO2 = new double[nSamplesTaken];
+            double* dataP7 = new double[nSamplesTaken];
+            double* dataP8 = new double[nSamplesTaken];
+                
+            EE_DataGet(hData, ED_O1, dataO1, nSamplesTaken);
+            EE_DataGet(hData, ED_O2, dataO2, nSamplesTaken);
+            EE_DataGet(hData, ED_P7, dataP7, nSamplesTaken);
+            EE_DataGet(hData, ED_P8, dataP8, nSamplesTaken);
+
+            classifier->updateEEGData(dataO1, dataO2, dataP7, dataP8, nSamplesTaken);
+
+            delete[] dataO1;
+            delete[] dataO2;
+            delete[] dataP7;
+            delete[] dataP8;
         }
-        else
-            cout << "SSVEP not found :-(" << endl;
     }
+    return classifier->calculateRatio(desiredFreq);
 }
 
 

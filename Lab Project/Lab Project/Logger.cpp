@@ -1,34 +1,40 @@
 #include "Logger.h"
 
-Logger::Logger(string fileName):
-    logFileName(fileName)
+Logger::Logger()
 {
     // Refresh the files
-    ofstream myfile;
-    myfile.open(logFileName);
-    myfile << "Test name,Accuracy" << endl;
-    myfile.close();
+    accuracyLogger.open("TestSuite.csv");
+    accuracyLogger << "Test name,Accuracy" << endl;
 
-    myfile.open("RValues.csv");
-    myfile << "freq,R values..." << endl;
-    myfile.close();
+    RLogger.open("RValues.csv");
+    RLogger << "Test Name,Frequency,R values..." << endl;
 }
 
 void Logger::logAccuracy(const string testName, const double accuracy)
 {
-    ofstream myfile;
-    myfile.open(logFileName, ios::app);
-    myfile << testName << "," << accuracy << endl;
-    myfile.close();
+    accuracyLogger << testName << "," << accuracy << endl;
 }
 
-void Logger::logR(const double freq, const vector<double> R)
+void Logger::logR(string testName, const double freq, const vector<double> R)
 {
-    ofstream myfile;
-    myfile.open("RValues.csv", ios::app);
-    myfile << freq << ",";
+    RLogger << testName << "," << freq << ",";
     for(int i = 0; i != R.size(); i++)
-        myfile << R.at(i) << ",";
+        RLogger << R.at(i) << ",";
 
-    myfile << endl;
+    RLogger << endl;
+}
+
+void Logger::plotR(const vector<double> R)
+{
+    const int displaySize = 50;
+    
+    if(R.size() > displaySize)
+    {
+        ofstream myfile;
+        myfile.open("RPlot.csv");
+        for(int i = R.size()-(displaySize-1); i != R.size(); i++)
+            myfile << i << "," << R.at(i) << endl;
+    }
+    else
+        return;
 }

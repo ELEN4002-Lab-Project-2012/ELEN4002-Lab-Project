@@ -8,10 +8,13 @@ using namespace std;
 class Logger
 {
 public:
-    Logger(string fileName);
+    Logger();
     void logAccuracy(const string testName, const double accuracy);
-    void logR(const double freq, const vector<double> R);
+    void logR(string testName, const double freq, const vector<double> R);
+    //void logR(const double freq, const double R);
+    void plotR(const vector<double> R);
 
 private:
-    string logFileName;
+    ofstream accuracyLogger;
+    ofstream RLogger;
 };

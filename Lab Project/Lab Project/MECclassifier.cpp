@@ -15,33 +15,37 @@ MECclassifier::MECclassifier(int size, double sampleFreq, int numChannels, bool 
     {
         boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq, window));
         channels.push_back(signal_ptr);
-    }
-    //cout << "MEC classifier instantiated" << endl;        // #################
+    }       
 }
 
-bool MECclassifier::isSSVEPpresent(double desiredFreq)
+double MECclassifier::calculateRatio(double desiredFreq)
 {
-    const int minCount = 3, maxCount = 5;
+    const double phaseShift = PI/8;     // 22.5deg
+    vector<double> Ratios;
+    Ratios.clear();
+    // If there is one positive detection for any phase => +ve detection
+    for(int i = 0; i != 4; i++)
+    {
+        mat Sw = findWeightedSignal(desiredFreq, i*phaseShift);                     // Find the new weighted signal      
+        double* SwArray = new double[sampleSize];                                   // Transform it into a double* array
+        for(int i = 0; i != sampleSize; i++)
+            SwArray[i] = Sw(i, 0);
 
-    // If the SSVEP frequency is detected on any channel, increment the counter
-    if(detectTargetFreq(desiredFreq) == true){
-        if(counter < maxCount)      // The counter can reach a maximum of maxCount. 
-            counter++;
-    }
-    else {
-        if(counter > 0)
-            counter--;              // Counter cannot go below 0      
-    }
+        swFFT.calcFFT(SwArray, sampleSize);
 
-    //cout << "MEC counter after frequency detection = " << counter << endl;
-    
-    // counter value of "minCount" indicates a successful detection.
-    // "Hysteresis" of "minCount - minCount + 1". That is, if the count reaches 5, it requires 
-    // 3 non-successful detections to return an overall negative SSVEP detection. 
-    if(counter >= minCount && counter <= maxCount)      
-        return true;
-    else
-        return false;
+        // Equation 11 -------
+        double upper = swFFT.getSpectrumMaxInRange(desiredFreq-0.1*desiredFreq, desiredFreq+0.1*desiredFreq);     // At f
+        double lower = swFFT.getSpectrumMaxInRange(6.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
+        double R = upper/lower;
+        //cout << "R = " << R << ". ";             
+        Ratios.push_back(R);
+
+        swFFT.zeroSpectrum();                           // Don't forget to zero everything (Aquilla's problem!)
+        delete SwArray;                                 // Clean up memory before returning
+        swFFT.printSpectrumCSV();
+    }  
+
+    return *max_element(Ratios.begin(),Ratios.end());   // Returns the maximum R value over all phases.
 }
 
 void MECclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7, double* dataP8, int nSamplesTaken)
@@ -61,14 +65,12 @@ void MECclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7
             Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
-    //cout << Y << endl;
 }
 
 void MECclassifier::loadTestData()
 {
     // Initialise signal data
     for(int i = 0; i != nChannels; i++) {
-        ;
         channels.at(i)->loadTestData();
         channels.at(i)->processSignal();
     }
@@ -78,67 +80,7 @@ void MECclassifier::loadTestData()
             Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
-    
-    /*cout << endl << "SAMPLE SIZE = " << sampleSize << endl;
-    srand((unsigned)time(0));                           // Seed random number generator
-    double* signal1 = new double[sampleSize];
-    double* signal2 = new double[sampleSize];
-    double* signal3 = new double[sampleSize];
-    double* signal4 = new double[sampleSize];
-    double testFreq = 15;
-    const double dt = 1.0/samplingFreq; 
-
-    for (std::size_t i = 0; i != sampleSize; ++i)
-    {  
-        signal1[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*2*i*dt) + 0.6*sin(2*PI*11*i*dt) + 0.5*sin(2*PI*18*i*dt);
-        signal2[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*3*i*dt) + 0.4*sin(2*PI*7*i*dt) + 0.6*sin(2*PI*19*i*dt);
-        signal3[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*4*i*dt) + 0.5*sin(2*PI*8*i*dt) + 0.5*sin(2*PI*21*i*dt);
-        signal4[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.3*sin(2*PI*5*i*dt) + 0.4*sin(2*PI*12*i*dt) + 0.4*sin(2*PI*17*i*dt);
-    }
-    mat Y(sampleSize, nChannels);
-    for(int i = 0; i != sampleSize; i++) {       // Fill the Y matrix with data.
-        Y(i, 0) = signal1[i];
-        Y(i, 1) = signal2[i];
-        Y(i, 2) = signal3[i];
-        Y(i, 3) = signal4[i];
-    }
-    cout << "Y = " << endl << Y << endl;*/
-}
-
-bool MECclassifier::detectTargetFreq(double f)
-{
-    const double phaseShift = PI/8;     // 22.5deg
-
-    // If there is one positive detection for any phase => +ve detection
-    for(int i = 0; i != 4; i++)
-    {
-        mat Sw = findWeightedSignal(f, i*phaseShift);               // Find the new weighted signal
-        //cout << "X phaseshift = " << i*phaseShift << endl;       
-        double* SwArray = new double[sampleSize];                   // Transform it into a double* array
-        for(int i = 0; i != sampleSize; i++)
-            SwArray[i] = Sw(i, 0);
-
-        swFFT.calcFFT(SwArray, sampleSize);
-
-        // Equation 11 -------
-        double upper = swFFT.getSpectrumMaxInRange(f-0.1*f, f+0.1*f);               // At f
-        double lower = swFFT.getSpectrumMaxInRange(8.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
-        double R = upper/lower;
-        cout << "R = " << R << ". ";             
-        Rvalues.push_back(R);
-
-        swFFT.zeroSpectrum();                       // Don't forget to zero everything (Aquilla's problem!)
-        delete SwArray;                             // Clean up memory before returning
-        swFFT.printSpectrumCSV();
-        if (R > 0.95){                              // May have to change this if R is not precise
-                           // NB printing to test output
-            return true;
-        }
-        else
-            return false;
-    }  
-}
-
+}  
 /**
 *   @param phaseShift Phase shift of the pure harmonics in X
 */

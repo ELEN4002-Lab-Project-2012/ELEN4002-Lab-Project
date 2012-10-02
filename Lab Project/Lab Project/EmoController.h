@@ -16,12 +16,14 @@
 #include "edkErrorCode.h"
 #include "FFT.h"
 #include "SSVEPclassifier.h"
+#include "SSVEPMonitor.h"
 #include <boost\shared_ptr.hpp>
 
 //Rudolf was here
 #include "eegTxRxData.h"
 
 typedef boost::shared_ptr<SSVEPclassifier> Classifier;
+typedef boost::shared_ptr<SSVEPMonitor> Monitor;
 
 //#pragma comment(lib, "../lib/edk.lib")   // Refer linker to the lib folder. 
 using namespace std;
@@ -37,8 +39,8 @@ public:
     EmoController(int numChannels);                                                                             
     void loop();
     void disconnectEmoEngine(); 
-    void initClassifier(Classifier myClassifier, double detectionFreq, bool isTest); 
-    void initClassifier(Classifier myClassifier, vector<double> detectionFreqs, bool isTest);
+    void initClassifier(Classifier myClassifier, Monitor myMonitor, double detectionFreq, bool isTest); 
+    void initClassifier(Classifier myClassifier, Monitor myMonitor, vector<double> detectionFreqs, bool isTest);
     virtual void run();
     void setDelayTime(double time);
 	bool LoadProfile();
@@ -46,7 +48,7 @@ public:
 private:
     void connectEmoEngine();
     void initEmotiv();
-    void processEEGdata(double, bool);
+    double processEEGdata(double, bool);
     void initChannels(int nNewSamples);
     
     double delayTime;
@@ -64,12 +66,13 @@ private:
 	int option;							
 	int state;
     Classifier classifier;
+    Monitor monitor;
     int nChannels;
     vector<double*> channels;
 
-    // Testing Data ################
-    unsigned int totDetections;         // Record tot number of detections made through the session
-    unsigned int positiveDetections;    // Record the number of positive detections made
+    // Testing Data
+    vector<int> totDetections;         // Record tot number of detections made through the session
+    vector<int> positiveDetections;    // Record the number of positive detections made
 
 };
 

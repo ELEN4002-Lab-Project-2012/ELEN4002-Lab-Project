@@ -15,7 +15,7 @@ CCAclassifier::CCAclassifier(int size, double sampleFreq, int numChannels,Aquila
     cout << "CCA classifier instantiated" << endl;
 }
 
-bool CCAclassifier::isSSVEPpresent(double desiredFreq)
+double CCAclassifier::calculateRatio(double desiredFreq)
 {
     return 0;
 }
@@ -37,7 +37,6 @@ void CCAclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7
             Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
-    //cout << Y << endl;
 }
 
 void CCAclassifier::loadTestData()
@@ -52,10 +51,4 @@ void CCAclassifier::loadTestData()
             Y(i, j) = channels.at(j)->getEEGSignal()[i];
         }
     }
-    //cout << "Y = " << endl << Y << endl;
-}
-
-bool CCAclassifier::detectTargetFreq(double f)
-{
-    return 0;
 }

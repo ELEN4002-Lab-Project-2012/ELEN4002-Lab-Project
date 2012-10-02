@@ -11,11 +11,9 @@ class PSDAclassifier: public SSVEPclassifier
 {
 public:
     PSDAclassifier(int sampleSize, double sampleFreq, int numChannels, bool padded, Aquila::WindowType window);
-    virtual bool isSSVEPpresent(double desiredFreq);
+    virtual double calculateRatio(double desiredFreq);
     virtual void updateEEGData(double*, double*, double*, double*, int);
     virtual void loadTestData();
-
-    bool detectTargetFreq(boost::shared_ptr<FFT> fft, double desiredFreq);
 
 private:
     int sampleSize;

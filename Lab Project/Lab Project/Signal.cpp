@@ -47,9 +47,6 @@ void Signal::loadTestData()             // Just an arbitrary example showing the
         signal = signal4;
         testCounter = 0;
     }
-
-    //delete signal1; delete signal2; delete signal3; delete signal4;
-    //signal1 = NULL; signal2 = NULL; signal3 = NULL; signal4 = NULL;
 }
 
 void Signal::updateSignal(double *buffer, int bufferSize)
@@ -107,6 +104,7 @@ void Signal::highPassFilter(double *x, int size)
     }
 }
 
+// DO NOT DELETE
 // Apply a high pass filter to the data
 /*void Signal::highPassFilter(double *x, const int size)
 {
