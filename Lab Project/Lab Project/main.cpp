@@ -9,17 +9,17 @@
 using namespace std;
 
 typedef boost::shared_ptr<Thread> CppThread;
-// Global variables
+// Global variables.
 extern bool testComplete;
 
 int main()
 {
     int sampleSize = 256;
     const unsigned int sampleFreq = 128;
-    double SSVEPfreq1 = 10, SSVEPfreq2 = 15, SSVEPfreq3 = 18;
+    double SSVEPfreq1 = 10, SSVEPfreq2 = 13, SSVEPfreq3 = 18;
     vector<double> SSVEPfrequencies; 
     SSVEPfrequencies.push_back(SSVEPfreq1);
-    //SSVEPfrequencies.push_back(SSVEPfreq2);
+    SSVEPfrequencies.push_back(SSVEPfreq2);
     //SSVEPfrequencies.push_back(SSVEPfreq3);
 
     bool useTestData = false;                    // 0 = use raw EEG data, 1 = test data.
