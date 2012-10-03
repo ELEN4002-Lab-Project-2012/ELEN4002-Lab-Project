@@ -1,12 +1,11 @@
 #include "Signal.h"
 
 // TO DO: find a better way to intialise padded signals. 
-Signal::Signal(int size, int padSize, double freq, Aquila::WindowType window):
+Signal::Signal(int size, int padSize, double freq):
     samplingFreq(freq), 
     sampleSize(size), 
     paddedSize(padSize),
-    plt("Input signal"),
-    windowFunction(window, size)
+    plt("Input signal")
 {
     freqRes = samplingFreq / sampleSize;       
     signal = new double[sampleSize];
@@ -55,25 +54,15 @@ void Signal::updateSignal(double *buffer, int bufferSize)
     copy(buffer, buffer+bufferSize, signal+sampleSize-bufferSize);  // Replace the end elements with buffer
 }
 
-// Function that averages the signal and applies the window function
+// Function that averages the signal
 void Signal::processSignal()
 {
     for(int i = 0; i != sampleSize; i++)
         averagedSignal[i] = signal[i];
     
     highPassFilter(averagedSignal, sampleSize);      // Remove the DC offset using HP. Result is stored in averagedSignal
-    applyWindowFunction();                           // Apply window to filtered signal
 
     //printAveragedSignalCSV();
-}
-
-void Signal::applyWindowFunction()
-{
-    const Aquila::Window::WindowDataType& windowData = windowFunction.getData(); // Data is returned in a vector with elements [0,1]
-    for(int i = 0; i != sampleSize; i++)
-    {
-        averagedSignal[i] = averagedSignal[i]*windowData[i];        // Multiply element by element
-    }
 }
 
 void Signal::zeroPadSignal()

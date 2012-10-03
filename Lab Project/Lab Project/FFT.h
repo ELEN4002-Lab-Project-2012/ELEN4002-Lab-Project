@@ -11,13 +11,14 @@
 #include "Signal.h"
 #include <cmath>
 #include <iostream>
+#include "Window.h"
 using namespace std;
-
+using namespace Aquila;
 
 class FFT
 {
 public:
-    FFT(int size, double rate, bool pad);
+    FFT(int size, double rate, bool pad, Aquila::WindowType type);
     void calcFFT(boost::shared_ptr<Signal> signal, int size);
     void calcFFT(double*, int size); 
     void calcAbsAveSpectrum();
@@ -35,6 +36,7 @@ public:
     void displayAverageSpectrum();
 
 private:
+    double* applyWindow(double* signal, int size);
     void initFFT(int complexSize, double freq);
     void initAbsoluteSpectrum();
     double* zeroPad(double* signal, int sampleSize);
@@ -50,6 +52,7 @@ private:
     boost::shared_array<double> absSpectrum;
     boost::shared_array<double> aveAbsSpectrum;
     Aquila::TextPlot plt;
+    Aquila::WindowType windowType;
 };
 
 #endif

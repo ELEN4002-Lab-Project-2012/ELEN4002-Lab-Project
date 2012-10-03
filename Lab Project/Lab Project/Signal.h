@@ -23,7 +23,7 @@ using namespace std;
 class Signal
 {
 public:
-    Signal(int size, int paddedSize, double rate, Aquila::WindowType window);
+    Signal(int size, int paddedSize, double rate);
     void updateSignal(double *buffer, int bufferSize);
     int getNumSamples() {return sampleSize;}
     double getSampleFreq() {return samplingFreq;}
@@ -44,7 +44,6 @@ public:
 private:
     void zeroPadSignal();
     double getWindowAverage(double* x, int size);
-    void applyWindowFunction();
 
     static int testCounter;
     double* signal;
@@ -57,7 +56,6 @@ private:
     static bool ready;
     static int counter;
     Aquila::TextPlot plt;
-    Aquila::Window windowFunction;
 
 };
 

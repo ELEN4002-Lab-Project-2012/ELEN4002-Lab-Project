@@ -9,7 +9,7 @@
 class CCAclassifier: public SSVEPclassifier
 {
 public:
-    CCAclassifier(int sampleSize, double sampleFreq, int numChannels, Aquila::WindowType window);
+    CCAclassifier(int sampleSize, double sampleFreq, int numChannels);
     virtual double calculateRatio(double desiredFreq);
     virtual void updateEEGData(double*, double*, double*, double*, int);
     virtual void loadTestData();                    // For testing purposes

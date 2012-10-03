@@ -1,8 +1,9 @@
 #include "FFT.h"
 
-FFT::FFT(int complexSize, double freq, bool pad):
+FFT::FFT(int complexSize, double freq, bool pad, Aquila::WindowType type):
     padded(pad), 
-    plt("Spectrum") 
+    plt("Spectrum"),
+    windowType(type)        // Initialise the window type you want to apply before doing an FFT
 {
     initFFT(complexSize, freq);
     // Zero the complex and absolute spectra
@@ -44,33 +45,51 @@ void FFT::initFFT(int complexSize, double freq)
 void FFT::calcFFT(boost::shared_ptr<Signal> signal, int size)
 {
     if(padded){
-        double* paddedSig = zeroPad(signal->getAveEEGSignal(), size);
+        double* windowedSignal = applyWindow(signal->getAveEEGSignal(), size);
+        double* paddedSig = zeroPad(windowedSignal, size);
         fft_ptr->fft(paddedSig, complexSpectrum);
+        delete windowedSignal;
         delete paddedSig;
         paddedSig = NULL;
+        windowedSignal = NULL;
     }
-    else
-        fft_ptr->fft(signal->getAveEEGSignal(), complexSpectrum);
+    else {
+        double* windowedSignal = applyWindow(signal->getAveEEGSignal(), size);
+        fft_ptr->fft(windowedSignal, complexSpectrum);
+    }
     
     initAbsoluteSpectrum();
-    //calcAbsAveSpectrum();                               // Calculate the average of 5 FFT spectra
 }
 
 void FFT::calcFFT(double* signal, int size)
 {
     if(padded) {
-        double* paddedSig = zeroPad(signal, size);
+        double* windowedSignal = applyWindow(signal, size);
+        double* paddedSig = zeroPad(windowedSignal, size);
         fft_ptr->fft(paddedSig, complexSpectrum);
+        delete windowedSignal;
         delete paddedSig;
         paddedSig = NULL;
+        windowedSignal = NULL;
     }
     else {
-        //cout << "Signal size = " << size << "; Complex spectrum size = " << complexFFTsize << endl;
-        fft_ptr->fft(signal, complexSpectrum);
+        double* windowedSignal = applyWindow(signal, size);
+        fft_ptr->fft(windowedSignal, complexSpectrum);
     }
     
     initAbsoluteSpectrum();
-    //calcAbsAveSpectrum();
+}
+
+double* FFT::applyWindow(double* signal, int size)
+{
+    Aquila::Window windowFunction(windowType, size);
+    const Aquila::Window::WindowDataType& windowData = windowFunction.getData(); // Data is returned in a vector with elements [0,1]
+    double* windowedSignal = new double[size];  
+    for(int i = 0; i != size; i++)
+    {
+        windowedSignal[i] = signal[i]*windowData[i];        // Multiply element by element
+    }
+    return windowedSignal;
 }
 
 double* FFT::zeroPad(double* signal, int sampleSize)

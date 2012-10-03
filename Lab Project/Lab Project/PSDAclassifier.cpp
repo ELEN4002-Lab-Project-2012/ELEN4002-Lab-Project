@@ -10,8 +10,8 @@ PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels, boo
     // Initialise the channels and FFTs
     for(int i = 0; i != nChannels; i++)
     {
-        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq, window));
-        boost::shared_ptr<FFT> fft_ptr(new FFT(sampleSize, samplingFreq, padded));
+        boost::shared_ptr<Signal> signal_ptr(new Signal(sampleSize, 2*sampleSize, samplingFreq));
+        boost::shared_ptr<FFT> fft_ptr(new FFT(sampleSize, samplingFreq, padded, window));
         channels.push_back(signal_ptr);
         FFTs.push_back(fft_ptr);
     }
