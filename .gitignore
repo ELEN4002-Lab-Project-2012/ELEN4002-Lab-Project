@@ -47,10 +47,12 @@ local.properties
 *.opensdf
 *.sln
 *.vcxproj
-*..vcxproj.filters
-
-
+*.vcxproj.filters
+ArmGUI.vcxproj
+ArmGUI.vcxproj.filters
+ArmGUI.vcxproj.user
 # Build results
+
 [Dd]ebug/
 [Rr]elease/
 *_i.c
