@@ -45,6 +45,10 @@ local.properties
 *.ArmGUI.vcxproj.user
 *.sln
 *.opensdf
+*.sln
+*.vcxproj
+*..vcxproj.filters
+
 
 # Build results
 [Dd]ebug/
