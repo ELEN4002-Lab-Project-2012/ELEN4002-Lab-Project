@@ -52,12 +52,10 @@ double LEDRectangularWindow(Controller controller, SSVEPCLASSIFIER);
 double LEDChangeDelayTime(Controller controller, SSVEPCLASSIFIER);
 double LEDFalsePositiveDetectionRate(Controller controller, SSVEPCLASSIFIER);
 void LEDRValuesOverFreqRange(Controller controller, SSVEPCLASSIFIER);
+void LEDMultipleFrequenciesInIsolation(Controller controller, SSVEPCLASSIFIER);
 void LEDMultipleFrequenciesSimultaneously(Controller controller, SSVEPCLASSIFIER);
 
 // General Test Groupings
-void doPSDATests();
-void doMECTests();
-void doCCATests();
 
 // Global variable to stop the main controller loop once the test is complete.
 extern bool testComplete;
@@ -67,27 +65,20 @@ int main() {
     boost::shared_ptr<EmoController> controller(new EmoController(numChannels));
     cout << "Use test data? 1 = yes, 0 = no" << endl;
     cin >> useTestData;
+    //Flasher SSVEPflasher(new AllegroFlasher(width, height));
+    enum SSVEPCLASSIFIER testClassifier = MEC;    // Chosen classifier type (PSDA, MEC or CCA)
 
-    Flasher SSVEPflasher(new AllegroFlasher(width, height));
+    // ============================ LED Tests ==============================
+    // To perform the tests, choose the SSVEPCLASSIFIER enum type (see above)
 
-    // ================ PSDA tests =================
-    /*LEDNoZeroPadding(controller, PSDA);
-    LEDPadding(controller, PSDA);
-    LEDRectangularWindow(controller, PSDA);
-    LEDChangeDelayTime(controller, PSDA);
-    LEDFalsePositiveDetectionRate(controller, PSDA);
-    LEDRValuesOverFreqRange(controller, PSDA);
-    LEDMultipleFrequenciesSimultaneously(controller, PSDA);
-    LEDRValues(controller, PSDA);*/
-
-    // ================= MEC monitor tests =================
-    /*LEDNoZeroPadding(controller, MEC);
-    LEDPadding(controller, MEC);
-    LEDRectangularWindow(controller, MEC);
-    LEDChangeDelayTime(controller, MEC);
-    LEDFalsePositiveDetectionRate(controller, MEC);
-    LEDRValuesOverFreqRange(controller, MEC);*/
-    LEDMultipleFrequenciesSimultaneously(controller, MEC);    
+    /*LEDNoZeroPadding(controller, testClassifier);
+    LEDPadding(controller, testClassifier);
+    LEDRectangularWindow(controller, testClassifier);
+    LEDChangeDelayTime(controller, testClassifier);
+    LEDFalsePositiveDetectionRate(controller, testClassifier);
+    LEDRValuesOverFreqRange(controller, testClassifier);*/
+    LEDMultipleFrequenciesInIsolation(controller, testClassifier);
+    LEDMultipleFrequenciesSimultaneously(controller, testClassifier);
 
     // ================= MEC allegro tests ==================
     //plotMECRValues(controller, SSVEPflasher, MEC);
@@ -123,7 +114,7 @@ double LEDNoZeroPadding(Controller controller, SSVEPCLASSIFIER classifier)
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     cout << "Press any key to continue." << endl; cin.ignore();
@@ -158,7 +149,7 @@ double LEDPadding(Controller controller, SSVEPCLASSIFIER classifier)
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -190,7 +181,7 @@ cout << "Press any key to continue." << endl; cin.ignore();
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -223,7 +214,7 @@ cout << "Press any key to continue." << endl; cin.ignore();
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -256,7 +247,7 @@ cout << "Press any key to continue." << endl; cin.ignore();
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -285,7 +276,7 @@ void LEDRValuesOverFreqRange(Controller controller, SSVEPCLASSIFIER classifier)
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
 
     for(int i = 0; i != numFrequencies; i++)
@@ -311,16 +302,18 @@ void LEDRValuesOverFreqRange(Controller controller, SSVEPCLASSIFIER classifier)
     }
 }
 
+/* For this test, the two stimulation sources should be directly adjacent to each other flashing continuously
+   The user is requested to look at the one then the other */
 void LEDMultipleFrequenciesSimultaneously(Controller controller, SSVEPCLASSIFIER classifier)
 {
     cout << "Press any key to continue." << endl; cin.ignore();
     cout << endl << "LEDMultipleFrequenciesSimultaneously test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
-    double SSVEPfreq0 = 10, SSVEPfreq1 = 12, SSVEPfreq2 = 15, SSVEPfreq3 = 18;
+    double SSVEPfreq0 = 10, SSVEPfreq1 = 13;
     bool usePadding = true;
     Aquila::WindowType window = Aquila::WIN_HAMMING;
     testComplete = false; 
 
-    vector<double> SSVEPfrequencies;      // Test frequencies
+    vector<double> SSVEPfrequencies;        // Test frequencies
     SSVEPfrequencies.push_back(SSVEPfreq0);
     SSVEPfrequencies.push_back(SSVEPfreq1);
     Monitor monitor(new SSVEPMonitor(SSVEPfrequencies));
@@ -332,28 +325,83 @@ void LEDMultipleFrequenciesSimultaneously(Controller controller, SSVEPCLASSIFIER
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfrequencies, useTestData);
     CppThread threadClassifier(new Thread(controller));
     threadClassifier->start(); 
 
+    
     for(int i = 0; i != SSVEPfrequencies.size(); i++)
     {
-        cout << "PLEASE START LOOKING AT LED WITH FREQUENCY = " << SSVEPfrequencies.at(i) << "====================================" << endl;
-        cout << "=====================================================================" << endl;
-        cout << endl << endl << endl << endl << endl << endl << endl << endl ;
+        cout << endl << endl << endl << endl << endl;
+        cout << "===============================================================================";
+        cout << "PLEASE START LOOKING AT LED WITH FREQUENCY = " << SSVEPfrequencies.at(i) << endl;
+        cout << "===============================================================================";
+        cout << endl << endl << endl << endl << endl;
         Sleep(testRunTime*1000);
     }
     testComplete = true;
     threadClassifier->waitForCompletion();
-
+    
+    std::stringstream out;      // Convert double to string in order to log the accuracy per frequency 
     FreqAccuracy accuracyStruct = monitor->calculateAccuracy();
-    std::stringstream out;      // Convert double to string in order to log the frequency
+    // Log R values for the whole experiment
     for(int i = 0; i != SSVEPfrequencies.size(); i++) {
-        out << SSVEPfrequencies.at(i);
-        testLogger.logAccuracy("LEDRvaluesOverFreq" + out.str(), accuracyStruct.Accuracy.at(i));
-        testLogger.logR("LEDRvaluesForMultipleFreq", SSVEPfrequencies.at(i), monitor->getAllRForFreq(SSVEPfrequencies.at(i)));
+        out.str(""); out << SSVEPfrequencies.at(i);         // Add the frequency to the name using stringstream
+        // Values are collected for the whole period so accuracy is not really valuable in this test. A guestimate is 2 x Accuracy.at(i)
+        testLogger.logAccuracy("MultipleFreqSimul" + out.str() + "Hz", 2*accuracyStruct.Accuracy.at(i));
+        testLogger.logR("LEDRvaluesForMultipleFreqSimul", SSVEPfrequencies.at(i), monitor->getAllRForFreq(SSVEPfrequencies.at(i)));
+    }
+}
+
+void LEDMultipleFrequenciesInIsolation(Controller controller, SSVEPCLASSIFIER classifier)
+{
+    cout << "Press any key to continue." << endl; cin.ignore();
+    cout << endl << "LEDMultipleFrequenciesInIsolation test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
+    double SSVEPfreq0 = 10, SSVEPfreq1 = 13;
+    bool usePadding = true;
+    Aquila::WindowType window = Aquila::WIN_HAMMING;
+    testComplete = false; 
+
+    vector<double> SSVEPfrequencies;        // Test frequencies
+    SSVEPfrequencies.push_back(SSVEPfreq0);
+    SSVEPfrequencies.push_back(SSVEPfreq1);
+    Monitor monitor(new SSVEPMonitor(SSVEPfrequencies));
+
+    // Create and start a new SSVEP classifier thread
+    switch(classifier){ 
+        case PSDA:
+            myClassifier.reset(new PSDAclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
+        case MEC:
+            myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
+        case CCA:
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
+    }
+    controller->initClassifier(myClassifier, monitor, SSVEPfrequencies, useTestData);
+    CppThread threadClassifier(new Thread(controller));
+    threadClassifier->start(); 
+
+    
+    for(int i = 0; i != SSVEPfrequencies.size(); i++)
+    {
+        cout << endl << endl << endl << endl << endl;
+        cout << "===============================================================================";
+        cout << "PLEASE START LOOKING AT LED WITH FREQUENCY = " << SSVEPfrequencies.at(i) << endl;
+        cout << "===============================================================================";
+        cout << endl << endl << endl << endl << endl;
+        Sleep(testRunTime*1000);
+    }
+    testComplete = true;
+    threadClassifier->waitForCompletion();
+    
+    std::stringstream out;      // Convert double to string in order to log the accuracy per frequency 
+    FreqAccuracy accuracyStruct = monitor->calculateAccuracy();
+    // Log R values for the whole experiment
+    for(int i = 0; i != SSVEPfrequencies.size(); i++) {
+        out.str(""); out << SSVEPfrequencies.at(i);         // Add the frequency to the name using stringstream
+        testLogger.logAccuracy("MultipleFreqIsolation" + out.str() + "Hz", 2*accuracyStruct.Accuracy.at(i));
+        testLogger.logR("LEDRvaluesForMultipleFreqIsol", SSVEPfrequencies.at(i), monitor->getAllRForFreq(SSVEPfrequencies.at(i)));
     }
 }
 
@@ -380,7 +428,7 @@ double allegroNoZeroPadding(Controller controller, Flasher flasher, SSVEPCLASSIF
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -420,7 +468,7 @@ double allegroZeroPadding(Controller controller, Flasher flasher, SSVEPCLASSIFIE
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -458,7 +506,7 @@ double allegroRectangularWindow(Controller controller, Flasher flasher, SSVEPCLA
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -497,7 +545,7 @@ double allegroChangeDelayTime(Controller controller, Flasher flasher, SSVEPCLASS
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -538,7 +586,7 @@ double allegroFalsePositiveDetectionRate(Controller controller, Flasher flasher,
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
     CppThread thread1(new Thread(controller));
@@ -634,7 +682,7 @@ void allegroMultipleFrequenciesSimultaneously(Controller controller, Flasher fla
         case MEC:
             myClassifier.reset(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window)); break;
         case CCA:
-            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels, window)); break;
+            myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfrequencies, useTestData);
     CppThread threadClassifier(new Thread(controller));
