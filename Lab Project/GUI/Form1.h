@@ -469,6 +469,7 @@ namespace ArmGUI {
 			this->numericUpDown1->Name = L"numericUpDown1";
 			this->numericUpDown1->Size = System::Drawing::Size(120, 20);
 			this->numericUpDown1->TabIndex = 18;
+			this->numericUpDown1->ValueChanged += gcnew System::EventHandler(this, &Form1::numericUpDown1_ValueChanged);
 			// 
 			// groupBox3
 			// 
@@ -1003,6 +1004,8 @@ private: System::Void label6_Click(System::Object^  sender, System::EventArgs^  
 private: System::Void label9_Click(System::Object^  sender, System::EventArgs^  e) {
 		 }
 private: System::Void label8_Click(System::Object^  sender, System::EventArgs^  e) {
+		 }
+private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
 		 }
 };
 

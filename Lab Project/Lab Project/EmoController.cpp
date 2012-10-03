@@ -172,13 +172,13 @@ void EmoController::loop()
 				    float actionPower;
 				    actionPower = ES_CognitivGetCurrentActionPower(eState);
 
-				    if  (COG_NEUTRAL  == ES_CognitivGetCurrentAction(eState) )	cout << "NEUTRAL! \n";
-				    if  (COG_LIFT  == ES_CognitivGetCurrentAction(eState) )	cout << "LIFTING! \n";
-				    if  ( COG_PUSH == ES_CognitivGetCurrentAction(eState) )	cout << "PUSHING ! \n";
-				    if  (COG_PULL  == ES_CognitivGetCurrentAction(eState) )	cout << "PULLING ! \n";
-				    if  ( COG_DROP   == ES_CognitivGetCurrentAction(eState) )	cout << "DROPPING ! \n";
-				    if  ( COG_LEFT == ES_CognitivGetCurrentAction(eState) )	cout << "LEFT ! \n";
-
+				    if  (COG_NEUTRAL	== ES_CognitivGetCurrentAction(eState) )	cout << "NEUTRAL! \n";
+				    if  (COG_LIFT		== ES_CognitivGetCurrentAction(eState) )	cout << "LIFTING! \n";
+				    if  (COG_PUSH		== ES_CognitivGetCurrentAction(eState) )	cout << "PUSHING ! \n";
+				    if  (COG_PULL		== ES_CognitivGetCurrentAction(eState) )	cout << "PULLING ! \n";
+				    if  (COG_DROP		== ES_CognitivGetCurrentAction(eState) )	cout << "DROPPING ! \n";
+				    if  (COG_LEFT		== ES_CognitivGetCurrentAction(eState) )	cout << "LEFT ! \n";
+					 
 				    HANDLE pipe = CreateFile(
 					    "\\\\.\\pipe\\EEG_DATA_PIPE",
 					    GENERIC_WRITE, // only need write access
@@ -204,7 +204,11 @@ void EmoController::loop()
 					    //populate eegDATA IF the pipe could be created, otherwise, why bother?
 					    eegTxRxData currentEEGdata(
 						    ES_CognitivGetCurrentAction(eState),
+							ES_ExpressivGetUpperFaceAction(eState),
+							ES_ExpressivGetUpperFaceAction(eState),
 						    ES_CognitivGetCurrentActionPower(eState),
+							ES_ExpressivGetUpperFaceActionPower(eState),
+							ES_ExpressivGetLowerFaceActionPower(eState),
 						    ES_CognitivIsActive(eState),
 						    ES_GetContactQuality(eState,EE_CHAN_O1),
 						    ES_GetContactQuality(eState,EE_CHAN_O2),

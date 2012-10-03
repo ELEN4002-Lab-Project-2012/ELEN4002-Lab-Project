@@ -19,7 +19,11 @@ private:
     void serialize(Archive & ar, const unsigned int version)
     {
         ar & currentAction;
-        ar & currentActionPower;
+		ar & currentUpperFaceAction;
+		ar & currentLowerFaceAction;
+		ar & currentActionPower;
+		ar & currentUpperFaceActionPower;
+		ar & currentLowerFaceActionPower;
         ar & CognitivIsActive;
         ar & ContactQ_O1;
         ar & ContactQ_O2;
@@ -38,7 +42,11 @@ private:
 
 public:
 	EE_CognitivAction_t		currentAction;
+	EE_ExpressivAlgo_t 		currentUpperFaceAction;
+	EE_ExpressivAlgo_t 		currentLowerFaceAction;
 	float					currentActionPower;
+	float					currentUpperFaceActionPower;
+	float					currentLowerFaceActionPower;
 	bool					CognitivIsActive;
 	EE_EEG_ContactQuality_t ContactQ_O1;
 	EE_EEG_ContactQuality_t	ContactQ_O2;
@@ -46,11 +54,15 @@ public:
 	EE_EEG_ContactQuality_t	ContactQ_P8;
 	int						HeadSetOn;
 
-
+	// Constructor
     eegTxRxData(){};
     eegTxRxData(
 	EE_CognitivAction_t		_currentAction,
+	EE_ExpressivAlgo_t 		_currentUpperFaceAction,
+	EE_ExpressivAlgo_t 		_currentLowerFaceAction,
 	float					_currentActionPower,
+	float					_currentUpperFaceActionPower,
+	float					_currentLowerFaceActionPower,
 	bool					_CognitivIsActive,
 	EE_EEG_ContactQuality_t _ContactQ_O1,
 	EE_EEG_ContactQuality_t	_ContactQ_O2,
@@ -58,7 +70,11 @@ public:
 	EE_EEG_ContactQuality_t	_ContactQ_P8,
 	int						_HeadSetOn ) :
 	currentAction(_currentAction),
+	currentUpperFaceAction(_currentUpperFaceAction),
+	currentLowerFaceAction(_currentLowerFaceAction),
 	currentActionPower(_currentActionPower),
+	currentUpperFaceActionPower(_currentUpperFaceActionPower),
+	currentLowerFaceActionPower(_currentLowerFaceActionPower),
 	CognitivIsActive(_CognitivIsActive),
 	ContactQ_O1(_ContactQ_O1),
 	ContactQ_O2(_ContactQ_O2),
@@ -69,3 +85,24 @@ public:
 };
 
 #endif
+
+/* Some fun Enum's that take forever to find
+Expressiv facial expression type enumerator 
+
+Enumerator: 
+EXP_NEUTRAL   
+EXP_BLINK   
+EXP_WINK_LEFT   
+EXP_WINK_RIGHT   
+EXP_HORIEYE   
+EXP_EYEBROW   
+EXP_FURROW   
+EXP_SMILE   
+EXP_CLENCH   
+EXP_LAUGH   
+EXP_SMIRK_LEFT   
+EXP_SMIRK_RIGHT   
+
+
+
+*/
