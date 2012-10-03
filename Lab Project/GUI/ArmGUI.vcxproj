@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\Graham\Documents\ELEN4002-Lab-Project\Lab Project\lib\libusbx-1.0.12-win\MS32\static;C:\Users\Graham\Documents\ELEN4002-Lab-Project\Lab Project\include\boost_1_51\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\Graham\Documents\ELEN4002-Lab-Project\Lab Project\include\boost_1_51;C:\Users\Graham\Documents\GitHub\ELEN4002-Lab-Project\Lab Project\lib\libusbx-1.0.12-win\include\libusbx-1.0;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Dropbox\Work and Active Documents\Wits\4th Year IE\Lab\Development\ELEN4002-Lab-Project\Lab Project\lib\libusbx-1.0.12-win\MS32\static;C:\Program Files %28x86%29\boost\boost_1_51\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\boost\boost_1_51;D:\Dropbox\Work and Active Documents\Wits\4th Year IE\Lab\Development\ELEN4002-Lab-Project\Lab Project\lib\libusbx-1.0.12-win\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

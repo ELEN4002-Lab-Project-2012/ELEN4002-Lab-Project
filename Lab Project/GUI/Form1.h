@@ -78,6 +78,20 @@ namespace ArmGUI {
 	private: System::Windows::Forms::Label^  lblCurrentAction;
 	private: System::Windows::Forms::Label^  label7;
 	private: System::Windows::Forms::Label^  lblCognitivIsActive;
+	private: System::Windows::Forms::GroupBox^  grpBxExpresiv;
+
+
+	private: System::Windows::Forms::Label^  label8;
+	private: System::Windows::Forms::ProgressBar^  progressBarUpperPower;
+
+
+	private: System::Windows::Forms::Label^  lblExpresivUpper;
+	private: System::Windows::Forms::Label^  label10;
+	private: System::Windows::Forms::ProgressBar^  progressBarLowerPower;
+	private: System::Windows::Forms::Label^  lblExpresivLower;
+
+
+
 
 
 
@@ -134,10 +148,18 @@ namespace ArmGUI {
 			this->label9 = (gcnew System::Windows::Forms::Label());
 			this->lblCurrentAction = (gcnew System::Windows::Forms::Label());
 			this->label7 = (gcnew System::Windows::Forms::Label());
+			this->grpBxExpresiv = (gcnew System::Windows::Forms::GroupBox());
+			this->label8 = (gcnew System::Windows::Forms::Label());
+			this->lblExpresivUpper = (gcnew System::Windows::Forms::Label());
+			this->progressBarUpperPower = (gcnew System::Windows::Forms::ProgressBar());
+			this->label10 = (gcnew System::Windows::Forms::Label());
+			this->progressBarLowerPower = (gcnew System::Windows::Forms::ProgressBar());
+			this->lblExpresivLower = (gcnew System::Windows::Forms::Label());
 			this->groupBox1->SuspendLayout();
 			this->groupBox2->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
 			this->groupBox3->SuspendLayout();
+			this->grpBxExpresiv->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -329,6 +351,7 @@ namespace ArmGUI {
 			this->progressBarCogPower->Step = 1;
 			this->progressBarCogPower->Style = System::Windows::Forms::ProgressBarStyle::Continuous;
 			this->progressBarCogPower->TabIndex = 15;
+			this->progressBarCogPower->Click += gcnew System::EventHandler(this, &Form1::progressBarCogPower_Click);
 			// 
 			// groupBox1
 			// 
@@ -465,7 +488,7 @@ namespace ArmGUI {
 			// 
 			// numericUpDown1
 			// 
-			this->numericUpDown1->Location = System::Drawing::Point(504, 126);
+			this->numericUpDown1->Location = System::Drawing::Point(6, 90);
 			this->numericUpDown1->Name = L"numericUpDown1";
 			this->numericUpDown1->Size = System::Drawing::Size(120, 20);
 			this->numericUpDown1->TabIndex = 18;
@@ -474,13 +497,14 @@ namespace ArmGUI {
 			// groupBox3
 			// 
 			this->groupBox3->Controls->Add(this->lblCognitivIsActive);
+			this->groupBox3->Controls->Add(this->numericUpDown1);
 			this->groupBox3->Controls->Add(this->label9);
 			this->groupBox3->Controls->Add(this->lblCurrentAction);
 			this->groupBox3->Controls->Add(this->label7);
 			this->groupBox3->Controls->Add(this->progressBarCogPower);
 			this->groupBox3->Location = System::Drawing::Point(281, 118);
 			this->groupBox3->Name = L"groupBox3";
-			this->groupBox3->Size = System::Drawing::Size(200, 98);
+			this->groupBox3->Size = System::Drawing::Size(200, 153);
 			this->groupBox3->TabIndex = 19;
 			this->groupBox3->TabStop = false;
 			this->groupBox3->Text = L"Cognitive";
@@ -522,13 +546,84 @@ namespace ArmGUI {
 			this->label7->TabIndex = 1;
 			this->label7->Text = L"Cognitiv Active:";
 			// 
+			// grpBxExpresiv
+			// 
+			this->grpBxExpresiv->Controls->Add(this->label10);
+			this->grpBxExpresiv->Controls->Add(this->progressBarLowerPower);
+			this->grpBxExpresiv->Controls->Add(this->lblExpresivLower);
+			this->grpBxExpresiv->Controls->Add(this->label8);
+			this->grpBxExpresiv->Controls->Add(this->progressBarUpperPower);
+			this->grpBxExpresiv->Controls->Add(this->lblExpresivUpper);
+			this->grpBxExpresiv->Location = System::Drawing::Point(487, 118);
+			this->grpBxExpresiv->Name = L"grpBxExpresiv";
+			this->grpBxExpresiv->Size = System::Drawing::Size(200, 153);
+			this->grpBxExpresiv->TabIndex = 20;
+			this->grpBxExpresiv->TabStop = false;
+			this->grpBxExpresiv->Text = L"Expresiv";
+			// 
+			// label8
+			// 
+			this->label8->AutoSize = true;
+			this->label8->Location = System::Drawing::Point(6, 15);
+			this->label8->Name = L"label8";
+			this->label8->Size = System::Drawing::Size(72, 13);
+			this->label8->TabIndex = 21;
+			this->label8->Text = L"Upper Action:";
+			this->label8->Click += gcnew System::EventHandler(this, &Form1::label8_Click_1);
+			// 
+			// lblExpresivUpper
+			// 
+			this->lblExpresivUpper->AutoSize = true;
+			this->lblExpresivUpper->Location = System::Drawing::Point(88, 15);
+			this->lblExpresivUpper->Name = L"lblExpresivUpper";
+			this->lblExpresivUpper->Size = System::Drawing::Size(77, 13);
+			this->lblExpresivUpper->TabIndex = 19;
+			this->lblExpresivUpper->Text = L"Current Action:";
+			// 
+			// progressBarUpperPower
+			// 
+			this->progressBarUpperPower->Location = System::Drawing::Point(6, 38);
+			this->progressBarUpperPower->Name = L"progressBarUpperPower";
+			this->progressBarUpperPower->Size = System::Drawing::Size(185, 23);
+			this->progressBarUpperPower->Step = 1;
+			this->progressBarUpperPower->Style = System::Windows::Forms::ProgressBarStyle::Continuous;
+			this->progressBarUpperPower->TabIndex = 20;
+			this->progressBarUpperPower->Click += gcnew System::EventHandler(this, &Form1::progressUpperPower_Click);
+			// 
+			// label10
+			// 
+			this->label10->AutoSize = true;
+			this->label10->Location = System::Drawing::Point(6, 67);
+			this->label10->Name = L"label10";
+			this->label10->Size = System::Drawing::Size(72, 13);
+			this->label10->TabIndex = 24;
+			this->label10->Text = L"Lower Action:";
+			// 
+			// progressBarLowerPower
+			// 
+			this->progressBarLowerPower->Location = System::Drawing::Point(6, 90);
+			this->progressBarLowerPower->Name = L"progressBarLowerPower";
+			this->progressBarLowerPower->Size = System::Drawing::Size(185, 23);
+			this->progressBarLowerPower->Step = 1;
+			this->progressBarLowerPower->Style = System::Windows::Forms::ProgressBarStyle::Continuous;
+			this->progressBarLowerPower->TabIndex = 23;
+			// 
+			// lblExpresivLower
+			// 
+			this->lblExpresivLower->AutoSize = true;
+			this->lblExpresivLower->Location = System::Drawing::Point(88, 67);
+			this->lblExpresivLower->Name = L"lblExpresivLower";
+			this->lblExpresivLower->Size = System::Drawing::Size(77, 13);
+			this->lblExpresivLower->TabIndex = 22;
+			this->lblExpresivLower->Text = L"Current Action:";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(922, 329);
+			this->ClientSize = System::Drawing::Size(931, 449);
+			this->Controls->Add(this->grpBxExpresiv);
 			this->Controls->Add(this->groupBox3);
-			this->Controls->Add(this->numericUpDown1);
 			this->Controls->Add(this->groupBox2);
 			this->Controls->Add(this->groupBox1);
 			this->Controls->Add(this->label1);
@@ -547,6 +642,8 @@ namespace ArmGUI {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->EndInit();
 			this->groupBox3->ResumeLayout(false);
 			this->groupBox3->PerformLayout();
+			this->grpBxExpresiv->ResumeLayout(false);
+			this->grpBxExpresiv->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -922,6 +1019,100 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 		lblCQP8->Text = "undefined signal Q?" ;
 	}
 
+	switch(receivedDataState.currentUpperFaceAction)
+	{
+		case EXP_NEUTRAL:
+			lblExpresivUpper->Text = "Neutral" ;
+			break;
+		case EXP_BLINK:
+			lblExpresivUpper->Text = "Blink" ;
+			break;
+		case EXP_WINK_LEFT:
+			lblExpresivUpper->Text = "Wink Left" ;
+ 			break;
+		case EXP_WINK_RIGHT:
+			lblExpresivUpper->Text = "Wink Right" ;
+			break;
+		case EXP_HORIEYE:
+			lblExpresivUpper->Text = "HoriEye???" ;
+			break;
+		case EXP_EYEBROW:
+			lblExpresivUpper->Text = "Eye Brow" ;
+			break;
+		case EXP_FURROW:
+			lblExpresivUpper->Text = "Furrowing Eye Brow" ;
+			break;
+		case EXP_SMILE:
+			lblExpresivUpper->Text = "Smile" ;
+			break;
+		case EXP_CLENCH:
+			lblExpresivUpper->Text = "Clench" ;
+			break;
+		case EXP_LAUGH :
+			lblExpresivUpper->Text = "Laugh" ;
+			break;
+		case EXP_SMIRK_LEFT:
+			lblExpresivUpper->Text = "Smirk Left" ;
+			break;
+		case EXP_SMIRK_RIGHT:
+			lblExpresivUpper->Text = "Smirk Right" ;
+			break;
+		default:
+   			lblExpresivUpper->Text = "Unknown" ;
+ 
+	}
+
+	switch(receivedDataState.currentLowerFaceAction)
+	{
+		case EXP_NEUTRAL:
+			lblExpresivLower->Text = "Neutral" ;
+			break;
+		case EXP_BLINK:
+			lblExpresivLower->Text = "Blink" ;
+			break;
+		case EXP_WINK_LEFT:
+			lblExpresivLower->Text = "Wink Left" ;
+ 			break;
+		case EXP_WINK_RIGHT:
+			lblExpresivLower->Text = "Wink Right" ;
+			break;
+		case EXP_HORIEYE:
+			lblExpresivLower->Text = "HoriEye???" ;
+			break;
+		case EXP_EYEBROW:
+			lblExpresivLower->Text = "Eye Brow" ;
+			break;
+		case EXP_FURROW:
+			lblExpresivLower->Text = "Furrowing Eye Brow" ;
+			break;
+		case EXP_SMILE:
+			lblExpresivLower->Text = "Smile" ;
+			break;
+		case EXP_CLENCH:
+			lblExpresivLower->Text = "Clench" ;
+			break;
+		case EXP_LAUGH :
+			lblExpresivLower->Text = "Laugh" ;
+			break;
+		case EXP_SMIRK_LEFT:
+			lblExpresivLower->Text = "Smirk Left" ;
+			break;
+		case EXP_SMIRK_RIGHT:
+			lblExpresivLower->Text = "Smirk Right" ;
+			break;
+		default:
+   			lblExpresivLower->Text = "Unknown" ;
+ 
+	}
+
+	//How powerfull is this?
+
+	currentActionPowerInt = (int) (receivedDataState.currentUpperFaceActionPower * 100);
+	progressBarUpperPower->Value = currentActionPowerInt ;
+	currentActionPowerInt = (int) (receivedDataState.currentLowerFaceActionPower * 100);
+	progressBarLowerPower->Value = currentActionPowerInt ;
+
+
 	//Is the headset on correctly?
 /*		Return whether the headset has been put on correctly or not. 
 		If the headset cannot not be detected on the head, then signal quality will not report any results for all the channels
@@ -1006,6 +1197,12 @@ private: System::Void label9_Click(System::Object^  sender, System::EventArgs^  
 private: System::Void label8_Click(System::Object^  sender, System::EventArgs^  e) {
 		 }
 private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+		 }
+private: System::Void label8_Click_1(System::Object^  sender, System::EventArgs^  e) {
+		 }
+private: System::Void progressBarCogPower_Click(System::Object^  sender, System::EventArgs^  e) {
+		 }
+private: System::Void progressUpperPower_Click(System::Object^  sender, System::EventArgs^  e) {
 		 }
 };
 

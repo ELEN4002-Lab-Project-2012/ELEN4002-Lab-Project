@@ -205,7 +205,7 @@ void EmoController::loop()
 					    eegTxRxData currentEEGdata(
 						    ES_CognitivGetCurrentAction(eState),
 							ES_ExpressivGetUpperFaceAction(eState),
-							ES_ExpressivGetUpperFaceAction(eState),
+							ES_ExpressivGetLowerFaceAction(eState),
 						    ES_CognitivGetCurrentActionPower(eState),
 							ES_ExpressivGetUpperFaceActionPower(eState),
 							ES_ExpressivGetLowerFaceActionPower(eState),
