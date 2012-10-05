@@ -1,12 +1,13 @@
 #ifndef eegTxRxData_H
 #define eegTxRxData_H
-#include"../include/EmoStateDLL.h"
+#include "../include/EmoStateDLL.h"
 #include <iostream>
 
 #include <sstream>
 #include <windows.h>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include "FrequencyDetectionStruct.h"
 
 class eegTxRxData
 {
@@ -30,7 +31,8 @@ private:
         ar & ContactQ_P7;
         ar & ContactQ_P8;
         ar & HeadSetOn;
-
+		ar & R1;
+		ar & SSVEP1bool;
     }
 
 
@@ -53,9 +55,12 @@ public:
 	EE_EEG_ContactQuality_t	ContactQ_P7;
 	EE_EEG_ContactQuality_t	ContactQ_P8;
 	int						HeadSetOn;
+	double					R1;
+	bool					SSVEP1bool;
 
 	// Constructor
     eegTxRxData(){};
+
     eegTxRxData(
 	EE_CognitivAction_t		_currentAction,
 	EE_ExpressivAlgo_t 		_currentUpperFaceAction,
@@ -68,7 +73,9 @@ public:
 	EE_EEG_ContactQuality_t	_ContactQ_O2,
 	EE_EEG_ContactQuality_t	_ContactQ_P7,
 	EE_EEG_ContactQuality_t	_ContactQ_P8,
-	int						_HeadSetOn ) :
+	int						_HeadSetOn,
+	double					_R1,
+	bool					_SSVEP1bool) :
 	currentAction(_currentAction),
 	currentUpperFaceAction(_currentUpperFaceAction),
 	currentLowerFaceAction(_currentLowerFaceAction),
@@ -80,7 +87,10 @@ public:
 	ContactQ_O2(_ContactQ_O2),
 	ContactQ_P7(_ContactQ_P7),
 	ContactQ_P8(_ContactQ_P8),
-	HeadSetOn(_HeadSetOn)
+	HeadSetOn(_HeadSetOn),
+	R1(_R1),
+	SSVEP1bool(_SSVEP1bool)
+	
 	{}
 };
 

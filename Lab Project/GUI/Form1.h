@@ -89,6 +89,15 @@ namespace ArmGUI {
 	private: System::Windows::Forms::Label^  label10;
 	private: System::Windows::Forms::ProgressBar^  progressBarLowerPower;
 	private: System::Windows::Forms::Label^  lblExpresivLower;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDownLowerFace;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDownUpperFace;
+	private: System::Windows::Forms::GroupBox^  groupBox4;
+	private: System::Windows::Forms::CheckBox^  checkBoxSSVEPActive;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDownR1;
+	private: System::Windows::Forms::Label^  label13;
+	private: System::Windows::Forms::ProgressBar^  progressBarR1;
+	private: System::Windows::Forms::Label^  lblR1Value;
+	private: System::Windows::Forms::Panel^  panelSsvepLive;
 
 
 
@@ -149,17 +158,30 @@ namespace ArmGUI {
 			this->lblCurrentAction = (gcnew System::Windows::Forms::Label());
 			this->label7 = (gcnew System::Windows::Forms::Label());
 			this->grpBxExpresiv = (gcnew System::Windows::Forms::GroupBox());
-			this->label8 = (gcnew System::Windows::Forms::Label());
-			this->lblExpresivUpper = (gcnew System::Windows::Forms::Label());
-			this->progressBarUpperPower = (gcnew System::Windows::Forms::ProgressBar());
+			this->numericUpDownLowerFace = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDownUpperFace = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label10 = (gcnew System::Windows::Forms::Label());
 			this->progressBarLowerPower = (gcnew System::Windows::Forms::ProgressBar());
 			this->lblExpresivLower = (gcnew System::Windows::Forms::Label());
+			this->label8 = (gcnew System::Windows::Forms::Label());
+			this->progressBarUpperPower = (gcnew System::Windows::Forms::ProgressBar());
+			this->lblExpresivUpper = (gcnew System::Windows::Forms::Label());
+			this->groupBox4 = (gcnew System::Windows::Forms::GroupBox());
+			this->checkBoxSSVEPActive = (gcnew System::Windows::Forms::CheckBox());
+			this->numericUpDownR1 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label13 = (gcnew System::Windows::Forms::Label());
+			this->progressBarR1 = (gcnew System::Windows::Forms::ProgressBar());
+			this->lblR1Value = (gcnew System::Windows::Forms::Label());
+			this->panelSsvepLive = (gcnew System::Windows::Forms::Panel());
 			this->groupBox1->SuspendLayout();
 			this->groupBox2->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
 			this->groupBox3->SuspendLayout();
 			this->grpBxExpresiv->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDownLowerFace))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDownUpperFace))->BeginInit();
+			this->groupBox4->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDownR1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -321,6 +343,7 @@ namespace ArmGUI {
 			// timer1
 			// 
 			this->timer1->Enabled = true;
+			this->timer1->Interval = 150;
 			this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
 			// 
 			// label1
@@ -548,6 +571,8 @@ namespace ArmGUI {
 			// 
 			// grpBxExpresiv
 			// 
+			this->grpBxExpresiv->Controls->Add(this->numericUpDownLowerFace);
+			this->grpBxExpresiv->Controls->Add(this->numericUpDownUpperFace);
 			this->grpBxExpresiv->Controls->Add(this->label10);
 			this->grpBxExpresiv->Controls->Add(this->progressBarLowerPower);
 			this->grpBxExpresiv->Controls->Add(this->lblExpresivLower);
@@ -556,10 +581,51 @@ namespace ArmGUI {
 			this->grpBxExpresiv->Controls->Add(this->lblExpresivUpper);
 			this->grpBxExpresiv->Location = System::Drawing::Point(487, 118);
 			this->grpBxExpresiv->Name = L"grpBxExpresiv";
-			this->grpBxExpresiv->Size = System::Drawing::Size(200, 153);
+			this->grpBxExpresiv->Size = System::Drawing::Size(200, 190);
 			this->grpBxExpresiv->TabIndex = 20;
 			this->grpBxExpresiv->TabStop = false;
 			this->grpBxExpresiv->Text = L"Expresiv";
+			// 
+			// numericUpDownLowerFace
+			// 
+			this->numericUpDownLowerFace->Location = System::Drawing::Point(6, 153);
+			this->numericUpDownLowerFace->Name = L"numericUpDownLowerFace";
+			this->numericUpDownLowerFace->Size = System::Drawing::Size(120, 20);
+			this->numericUpDownLowerFace->TabIndex = 25;
+			// 
+			// numericUpDownUpperFace
+			// 
+			this->numericUpDownUpperFace->Location = System::Drawing::Point(6, 67);
+			this->numericUpDownUpperFace->Name = L"numericUpDownUpperFace";
+			this->numericUpDownUpperFace->Size = System::Drawing::Size(120, 20);
+			this->numericUpDownUpperFace->TabIndex = 19;
+			// 
+			// label10
+			// 
+			this->label10->AutoSize = true;
+			this->label10->Location = System::Drawing::Point(6, 101);
+			this->label10->Name = L"label10";
+			this->label10->Size = System::Drawing::Size(72, 13);
+			this->label10->TabIndex = 24;
+			this->label10->Text = L"Lower Action:";
+			// 
+			// progressBarLowerPower
+			// 
+			this->progressBarLowerPower->Location = System::Drawing::Point(6, 124);
+			this->progressBarLowerPower->Name = L"progressBarLowerPower";
+			this->progressBarLowerPower->Size = System::Drawing::Size(185, 23);
+			this->progressBarLowerPower->Step = 1;
+			this->progressBarLowerPower->Style = System::Windows::Forms::ProgressBarStyle::Continuous;
+			this->progressBarLowerPower->TabIndex = 23;
+			// 
+			// lblExpresivLower
+			// 
+			this->lblExpresivLower->AutoSize = true;
+			this->lblExpresivLower->Location = System::Drawing::Point(88, 101);
+			this->lblExpresivLower->Name = L"lblExpresivLower";
+			this->lblExpresivLower->Size = System::Drawing::Size(77, 13);
+			this->lblExpresivLower->TabIndex = 22;
+			this->lblExpresivLower->Text = L"Current Action:";
 			// 
 			// label8
 			// 
@@ -571,15 +637,6 @@ namespace ArmGUI {
 			this->label8->Text = L"Upper Action:";
 			this->label8->Click += gcnew System::EventHandler(this, &Form1::label8_Click_1);
 			// 
-			// lblExpresivUpper
-			// 
-			this->lblExpresivUpper->AutoSize = true;
-			this->lblExpresivUpper->Location = System::Drawing::Point(88, 15);
-			this->lblExpresivUpper->Name = L"lblExpresivUpper";
-			this->lblExpresivUpper->Size = System::Drawing::Size(77, 13);
-			this->lblExpresivUpper->TabIndex = 19;
-			this->lblExpresivUpper->Text = L"Current Action:";
-			// 
 			// progressBarUpperPower
 			// 
 			this->progressBarUpperPower->Location = System::Drawing::Point(6, 38);
@@ -590,38 +647,88 @@ namespace ArmGUI {
 			this->progressBarUpperPower->TabIndex = 20;
 			this->progressBarUpperPower->Click += gcnew System::EventHandler(this, &Form1::progressUpperPower_Click);
 			// 
-			// label10
+			// lblExpresivUpper
 			// 
-			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(6, 67);
-			this->label10->Name = L"label10";
-			this->label10->Size = System::Drawing::Size(72, 13);
-			this->label10->TabIndex = 24;
-			this->label10->Text = L"Lower Action:";
+			this->lblExpresivUpper->AutoSize = true;
+			this->lblExpresivUpper->Location = System::Drawing::Point(88, 15);
+			this->lblExpresivUpper->Name = L"lblExpresivUpper";
+			this->lblExpresivUpper->Size = System::Drawing::Size(77, 13);
+			this->lblExpresivUpper->TabIndex = 19;
+			this->lblExpresivUpper->Text = L"Current Action:";
 			// 
-			// progressBarLowerPower
+			// groupBox4
 			// 
-			this->progressBarLowerPower->Location = System::Drawing::Point(6, 90);
-			this->progressBarLowerPower->Name = L"progressBarLowerPower";
-			this->progressBarLowerPower->Size = System::Drawing::Size(185, 23);
-			this->progressBarLowerPower->Step = 1;
-			this->progressBarLowerPower->Style = System::Windows::Forms::ProgressBarStyle::Continuous;
-			this->progressBarLowerPower->TabIndex = 23;
+			this->groupBox4->Controls->Add(this->checkBoxSSVEPActive);
+			this->groupBox4->Controls->Add(this->numericUpDownR1);
+			this->groupBox4->Controls->Add(this->label13);
+			this->groupBox4->Controls->Add(this->progressBarR1);
+			this->groupBox4->Controls->Add(this->lblR1Value);
+			this->groupBox4->Location = System::Drawing::Point(693, 118);
+			this->groupBox4->Name = L"groupBox4";
+			this->groupBox4->Size = System::Drawing::Size(200, 190);
+			this->groupBox4->TabIndex = 26;
+			this->groupBox4->TabStop = false;
+			this->groupBox4->Text = L"SSVEP";
 			// 
-			// lblExpresivLower
+			// checkBoxSSVEPActive
 			// 
-			this->lblExpresivLower->AutoSize = true;
-			this->lblExpresivLower->Location = System::Drawing::Point(88, 67);
-			this->lblExpresivLower->Name = L"lblExpresivLower";
-			this->lblExpresivLower->Size = System::Drawing::Size(77, 13);
-			this->lblExpresivLower->TabIndex = 22;
-			this->lblExpresivLower->Text = L"Current Action:";
+			this->checkBoxSSVEPActive->AutoSize = true;
+			this->checkBoxSSVEPActive->Location = System::Drawing::Point(6, 167);
+			this->checkBoxSSVEPActive->Name = L"checkBoxSSVEPActive";
+			this->checkBoxSSVEPActive->Size = System::Drawing::Size(130, 17);
+			this->checkBoxSSVEPActive->TabIndex = 22;
+			this->checkBoxSSVEPActive->Text = L"SSVEP Control Active";
+			this->checkBoxSSVEPActive->UseVisualStyleBackColor = true;
+			// 
+			// numericUpDownR1
+			// 
+			this->numericUpDownR1->Location = System::Drawing::Point(6, 67);
+			this->numericUpDownR1->Name = L"numericUpDownR1";
+			this->numericUpDownR1->Size = System::Drawing::Size(120, 20);
+			this->numericUpDownR1->TabIndex = 19;
+			this->numericUpDownR1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {95, 0, 0, 0});
+			// 
+			// label13
+			// 
+			this->label13->AutoSize = true;
+			this->label13->Location = System::Drawing::Point(6, 15);
+			this->label13->Name = L"label13";
+			this->label13->Size = System::Drawing::Size(48, 13);
+			this->label13->TabIndex = 21;
+			this->label13->Text = L"R Value:";
+			// 
+			// progressBarR1
+			// 
+			this->progressBarR1->Location = System::Drawing::Point(6, 38);
+			this->progressBarR1->Name = L"progressBarR1";
+			this->progressBarR1->Size = System::Drawing::Size(185, 23);
+			this->progressBarR1->Step = 1;
+			this->progressBarR1->Style = System::Windows::Forms::ProgressBarStyle::Continuous;
+			this->progressBarR1->TabIndex = 20;
+			// 
+			// lblR1Value
+			// 
+			this->lblR1Value->AutoSize = true;
+			this->lblR1Value->Location = System::Drawing::Point(60, 15);
+			this->lblR1Value->Name = L"lblR1Value";
+			this->lblR1Value->Size = System::Drawing::Size(13, 13);
+			this->lblR1Value->TabIndex = 19;
+			this->lblR1Value->Text = L"0";
+			// 
+			// panelSsvepLive
+			// 
+			this->panelSsvepLive->Location = System::Drawing::Point(693, 314);
+			this->panelSsvepLive->Name = L"panelSsvepLive";
+			this->panelSsvepLive->Size = System::Drawing::Size(200, 100);
+			this->panelSsvepLive->TabIndex = 27;
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(931, 449);
+			this->Controls->Add(this->panelSsvepLive);
+			this->Controls->Add(this->groupBox4);
 			this->Controls->Add(this->grpBxExpresiv);
 			this->Controls->Add(this->groupBox3);
 			this->Controls->Add(this->groupBox2);
@@ -644,6 +751,11 @@ namespace ArmGUI {
 			this->groupBox3->PerformLayout();
 			this->grpBxExpresiv->ResumeLayout(false);
 			this->grpBxExpresiv->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDownLowerFace))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDownUpperFace))->EndInit();
+			this->groupBox4->ResumeLayout(false);
+			this->groupBox4->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDownR1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -804,7 +916,7 @@ private: System::Void textBox1_KeyDown(System::Object^  sender, System::Windows:
 			 }
 		 }
 private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) 		 
-		 {
+{
 			 eegTxRxData receivedDataState;
 	    HANDLE pipe = CreateNamedPipe(
 		L"\\\\.\\pipe\\EEG_DATA_PIPE", // name of the pipe
@@ -917,107 +1029,152 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 	int currentActionPowerInt = (int) (receivedDataState.currentActionPower * 100);
 	progressBarCogPower->Value = currentActionPowerInt ;
 
+	try
+	{
 	//Headset Contact Qaulity
 	// O1 
-	if (receivedDataState.ContactQ_O1 == 	EEG_CQ_NO_SIGNAL)
-	{
-		lblCQO1->Text = "No Signal!" ;
+		if (receivedDataState.ContactQ_O1 == 	EEG_CQ_NO_SIGNAL)
+		{
+			lblCQO1->Text = "No Signal!" ;
+		}
+		else if (receivedDataState.ContactQ_O1 == EEG_CQ_VERY_BAD)
+		{
+			lblCQO1->Text = "Very Bad!" ;
+		}
+		else if (receivedDataState.ContactQ_O1 == EEG_CQ_POOR)
+		{
+			lblCQO1->Text = "Poor." ;
+		}
+		else if (receivedDataState.ContactQ_O1 == EEG_CQ_FAIR)
+		{
+			lblCQO1->Text = "Fair..." ;
+		}
+		else if (receivedDataState.ContactQ_O1 == EEG_CQ_GOOD)
+		{
+			lblCQO1->Text = "GOOD!" ;
+		}
+		else
+		{
+			lblCQO1->Text = "undefined signal Q?" ;
+		}
+		// O2
+		if (receivedDataState.ContactQ_O2 == 	EEG_CQ_NO_SIGNAL)
+		{
+			lblCQO2->Text = "No Signal!" ;
+		}
+		else if (receivedDataState.ContactQ_O2 == EEG_CQ_VERY_BAD)
+		{
+			lblCQO2->Text = "Very Bad!" ;
+		}
+		else if (receivedDataState.ContactQ_O2 == EEG_CQ_POOR)
+		{
+			lblCQO2->Text = "Poor." ;
+		}
+		else if (receivedDataState.ContactQ_O2 == EEG_CQ_FAIR)
+		{
+			lblCQO2->Text = "Fair..." ;
+		}
+		else if (receivedDataState.ContactQ_O2 == EEG_CQ_GOOD)
+		{
+			lblCQO2->Text = "GOOD!" ;
+		}
+		else
+		{
+			lblCQO2->Text = "undefined signal Q?" ;
+		}
+			// P7
+		if (receivedDataState.ContactQ_P7 == 	EEG_CQ_NO_SIGNAL)
+		{
+			lblCQP7->Text = "No Signal!" ;
+		}
+		else if (receivedDataState.ContactQ_P7 == EEG_CQ_VERY_BAD)
+		{
+			lblCQP7->Text = "Very Bad!" ;
+		}
+		else if (receivedDataState.ContactQ_P7 == EEG_CQ_POOR)
+		{
+			lblCQP7->Text = "Poor." ;
+		}
+		else if (receivedDataState.ContactQ_P7 == EEG_CQ_FAIR)
+		{
+			lblCQP7->Text = "Fair..." ;
+		}
+		else if (receivedDataState.ContactQ_P7 == EEG_CQ_GOOD)
+		{
+			lblCQP7->Text = "GOOD!" ;
+		}
+		else
+		{
+			lblCQP7->Text = "undefined signal Q?" ;
+		}
+			// P8
+		if (receivedDataState.ContactQ_P8 == 	EEG_CQ_NO_SIGNAL)
+		{
+			lblCQP8->Text = "No Signal!" ;
+		}
+		else if (receivedDataState.ContactQ_P8 == EEG_CQ_VERY_BAD)
+		{
+			lblCQP8->Text = "Very Bad!" ;
+		}
+		else if (receivedDataState.ContactQ_P8 == EEG_CQ_POOR)
+		{
+			lblCQP8->Text = "Poor." ;
+		}
+		else if (receivedDataState.ContactQ_P8 == EEG_CQ_FAIR)
+		{
+			lblCQP8->Text = "Fair..." ;
+		}
+		else if (receivedDataState.ContactQ_P8 == EEG_CQ_GOOD)
+		{
+			lblCQP8->Text = "GOOD!" ;
+		}
+		else
+		{
+			lblCQP8->Text = "undefined signal Q?" ;
+		}
 	}
-	else if (receivedDataState.ContactQ_O1 == EEG_CQ_VERY_BAD)
+	catch (int e)
 	{
-		lblCQO1->Text = "Very Bad!" ;
 	}
-	else if (receivedDataState.ContactQ_O1 == EEG_CQ_POOR)
+
+
+	//SSVEP DETECTION
+	bool ssvepDetected = false ;
+	bool ssvepActive = false ;
+	int intR1 = (int) (receivedDataState.R1 * 100);
+	
+	progressBarR1->Value = intR1 ;
+
+	lblR1Value->Text = intR1.ToString();
+	
+	if (intR1 > numericUpDownR1->Value)
 	{
-		lblCQO1->Text = "Poor." ;
+		ssvepDetected = true;
 	}
-	else if (receivedDataState.ContactQ_O1 == EEG_CQ_FAIR)
+
+	ssvepDetected = receivedDataState.SSVEP1bool;
+
+	if ((ssvepDetected) && (checkBoxSSVEPActive->Checked ==true))
 	{
-		lblCQO1->Text = "Fair..." ;
+		ssvepActive = true;
+		
+			panelSsvepLive->BackColor = Color::Red ;
+		
+			
+		
 	}
-	else if (receivedDataState.ContactQ_O1 == EEG_CQ_GOOD)
+	else if((!ssvepDetected) && (checkBoxSSVEPActive->Checked ==true))
 	{
-		lblCQO1->Text = "GOOD!" ;
+		panelSsvepLive->BackColor = Color::Green ;
 	}
 	else
 	{
-		lblCQO1->Text = "undefined signal Q?" ;
+		ssvepActive = false;
+		panelSsvepLive->BackColor = Color::Black ;
 	}
-	// O2
-	if (receivedDataState.ContactQ_O2 == 	EEG_CQ_NO_SIGNAL)
-	{
-		lblCQO2->Text = "No Signal!" ;
-	}
-	else if (receivedDataState.ContactQ_O2 == EEG_CQ_VERY_BAD)
-	{
-		lblCQO2->Text = "Very Bad!" ;
-	}
-	else if (receivedDataState.ContactQ_O2 == EEG_CQ_POOR)
-	{
-		lblCQO2->Text = "Poor." ;
-	}
-	else if (receivedDataState.ContactQ_O2 == EEG_CQ_FAIR)
-	{
-		lblCQO2->Text = "Fair..." ;
-	}
-	else if (receivedDataState.ContactQ_O2 == EEG_CQ_GOOD)
-	{
-		lblCQO2->Text = "GOOD!" ;
-	}
-	else
-	{
-		lblCQO2->Text = "undefined signal Q?" ;
-	}
-		// P7
-	if (receivedDataState.ContactQ_P7 == 	EEG_CQ_NO_SIGNAL)
-	{
-		lblCQP7->Text = "No Signal!" ;
-	}
-	else if (receivedDataState.ContactQ_P7 == EEG_CQ_VERY_BAD)
-	{
-		lblCQP7->Text = "Very Bad!" ;
-	}
-	else if (receivedDataState.ContactQ_P7 == EEG_CQ_POOR)
-	{
-		lblCQP7->Text = "Poor." ;
-	}
-	else if (receivedDataState.ContactQ_P7 == EEG_CQ_FAIR)
-	{
-		lblCQP7->Text = "Fair..." ;
-	}
-	else if (receivedDataState.ContactQ_P7 == EEG_CQ_GOOD)
-	{
-		lblCQP7->Text = "GOOD!" ;
-	}
-	else
-	{
-		lblCQP7->Text = "undefined signal Q?" ;
-	}
-		// P8
-	if (receivedDataState.ContactQ_P8 == 	EEG_CQ_NO_SIGNAL)
-	{
-		lblCQP8->Text = "No Signal!" ;
-	}
-	else if (receivedDataState.ContactQ_P8 == EEG_CQ_VERY_BAD)
-	{
-		lblCQP8->Text = "Very Bad!" ;
-	}
-	else if (receivedDataState.ContactQ_P8 == EEG_CQ_POOR)
-	{
-		lblCQP8->Text = "Poor." ;
-	}
-	else if (receivedDataState.ContactQ_P8 == EEG_CQ_FAIR)
-	{
-		lblCQP8->Text = "Fair..." ;
-	}
-	else if (receivedDataState.ContactQ_P8 == EEG_CQ_GOOD)
-	{
-		lblCQP8->Text = "GOOD!" ;
-	}
-	else
-	{
-		lblCQP8->Text = "undefined signal Q?" ;
-	}
+
+
+	
 
 	switch(receivedDataState.currentUpperFaceAction)
 	{
@@ -1111,6 +1268,70 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 	progressBarUpperPower->Value = currentActionPowerInt ;
 	currentActionPowerInt = (int) (receivedDataState.currentLowerFaceActionPower * 100);
 	progressBarLowerPower->Value = currentActionPowerInt ;
+
+
+	bool upperFaceActive = false ;
+
+	if ((receivedDataState.currentUpperFaceActionPower > 0.85) && (checkBoxUsbEnabled-> Checked == true))
+	{
+		if (receivedDataState.currentUpperFaceAction == EXP_EYEBROW)
+		{
+			testArm.elbowUp();
+			upperFaceActive = true ;
+		}
+		else if (receivedDataState.currentUpperFaceAction ==EXP_FURROW)
+		{
+			testArm.elbowDown();
+			upperFaceActive = true ;
+
+		}
+		else
+		{
+			testArm.armStop();
+		}
+			
+	
+	}
+	else if ((receivedDataState.currentUpperFaceActionPower <= 0.85) && (checkBoxUsbEnabled-> Checked == true))
+	{
+		testArm.armStop();
+		upperFaceActive = false ;
+	}
+
+
+	if ((receivedDataState.currentLowerFaceActionPower > 0.5) && (checkBoxUsbEnabled-> Checked == true))
+	{
+		if (receivedDataState.currentLowerFaceAction == EXP_SMILE)
+		{
+			
+		
+				testArm.baseCounterClockwise();
+		}
+		else if (receivedDataState.currentLowerFaceAction == EXP_CLENCH)
+		{
+			testArm.baseClockwise();
+
+		}
+		else
+		{
+			
+				testArm.armStop();
+			
+		}
+
+	}
+	else if ((receivedDataState.currentLowerFaceActionPower <= 0.5) && (checkBoxUsbEnabled-> Checked == true))
+	{
+		if (!upperFaceActive)
+		{
+			testArm.armStop();
+		}
+	}
+		
+//	else
+//	{
+//		testArm.armStop();
+//	}
 
 
 	//Is the headset on correctly?

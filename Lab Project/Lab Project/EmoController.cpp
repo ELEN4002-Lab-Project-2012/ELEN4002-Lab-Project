@@ -5,7 +5,7 @@ bool testComplete;
 
 EmoController::EmoController(int numChannels):      
     nChannels(numChannels),
-    delayTime(200)              // Default d = 200ms
+    delayTime(150)              // Default d = 200ms
 {   
     initEmotiv();
     connectEmoEngine();
@@ -125,7 +125,8 @@ void EmoController::disconnectEmoEngine()
 }
 
 void EmoController::loop()
-{       
+{    
+	FreqDetections detections;  // Struct storing bools for each frequency
     if(test) {
         classifier->loadTestData();
         cout << "Loaded test data" << endl;
@@ -134,9 +135,30 @@ void EmoController::loop()
     EE_DataSetBufferSizeInSec(secs);		            // Initialise the data buffer size in seconds
 
     // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread  
-    while (!testComplete) 
+    //while (!testComplete)
+	while (true)
     {
 		state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
+
+		//RUDOLF WAS HERE
+		if (readytocollect) 
+		{
+            vector<double> Ratios;
+		    for(int i = 0; i != SSVEPfreqs.size(); i++) 
+            {	
+                // Process raw EEG data. Return a ratio for each of the multiple frequencies.
+                cout << "Frequency = " << SSVEPfreqs.at(i) << ": ";
+                Ratios.push_back(processEEGdata(SSVEPfreqs.at(i), test));
+                cout << "Ratio = " << Ratios.at(i) << endl;
+            }
+            // >>>>>>>>> HERE IS THE STRUCT <<<<<<<<<<<<
+           
+            detections = monitor->monitorSSVEPDetections(Ratios, 0.95);     // SPECIFY THRESHOLD 0.95
+		}
+
+		//AND HERE
+
+
 
 		if (state == EDK_OK)                            // Operation has been carried out successfully (no error)
 		{						    
@@ -156,10 +178,18 @@ void EmoController::loop()
 						    std::cout << "++==Loading of user profile Failed!==++ \n";
 						    std::cout << "Trying to do any cognitive stuff will fail stupidly! \n";	
 					    }
+					if (EE_ExpressivSetSignatureType(userID,EXP_SIG_TRAINED) != EDK_OK) 
+					{
+						std::cout << "LOL, what Graham said! \n";
+					}
+					else
+					{
+						std::cout << "SET TRAINED! :) \n";
+					}
 						    for(int a=0; a < 10 ; a++)
 						    {
 							    cout << "*";
-							    Sleep(200);
+							    Sleep(300);
 						    }
 						    cout << "\n" ;    
 				    }
@@ -214,7 +244,9 @@ void EmoController::loop()
 						    ES_GetContactQuality(eState,EE_CHAN_O2),
 						    ES_GetContactQuality(eState,EE_CHAN_P7 ),
 						    ES_GetContactQuality(eState,EE_CHAN_P8 ),
-						    ES_GetHeadsetOn(eState)
+						    ES_GetHeadsetOn(eState),
+							detections.Rvalues.at(0),
+							detections.detected.at(0)
 						    );
 				
 					    //Serialize
@@ -246,19 +278,16 @@ void EmoController::loop()
 				    break;
 			}
         }
-        if (readytocollect) {
-            vector<double> Ratios;
-		    for(int i = 0; i != SSVEPfreqs.size(); i++) 
-            {	
-                // Process raw EEG data. Return a ratio for each of the multiple frequencies.
-                cout << "Frequency = " << SSVEPfreqs.at(i) << ": ";
-                Ratios.push_back(processEEGdata(SSVEPfreqs.at(i), test));
-                cout << "Ratio = " << Ratios.at(i) << endl;
-            }
-            // >>>>>>>>> HERE IS THE STRUCT <<<<<<<<<<<<
-            FreqDetections detections;  // Struct storing bools for each frequency
-            detections = monitor->monitorSSVEPDetections(Ratios, 0.95);     // SPECIFY THRESHOLD 0.95
-		}
+		
+		
+		
+
+		
+        
+		
+		while (EE_EngineGetNextEvent(eEvent) != EDK_NO_EVENT ) 
+		{Sleep(1);}
+		
 		Sleep(delayTime);
 	}
     testComplete = false;
@@ -321,7 +350,7 @@ bool EmoController::LoadProfile()
 {
 	bool LoadSuccess = true ;
 
-	if (EE_LoadUserProfile(userID,"RudolfHoehler.emuy")!= EDK_OK)
+	if (EE_LoadUserProfile(userID,"RudolfHoehler.emu")!= EDK_OK)
 	{
 		cout << "FAILED! to Load Profile from FILE!";
 		LoadSuccess = false ;

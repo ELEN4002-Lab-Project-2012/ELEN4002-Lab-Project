@@ -3,14 +3,12 @@
 
 #include <vector>
 #include <iostream>
+#include "FrequencyDetectionStruct.h"
+
 using namespace std;
     
 typedef vector<vector<double> > RValues;            // 2D vector to store R vs. frequency
-struct FreqDetections {
-    vector<double> frequencies;
-    vector<bool> detected;
-    vector<double> Rvalues;
-};
+
 struct FreqAccuracy {
     vector<double> frequencies;
     vector<double> Accuracy;

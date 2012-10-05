@@ -51,7 +51,7 @@ FreqDetections SSVEPMonitor::monitorSSVEPDetections(const vector<double> &R, dou
     nTotalDetections++;
     for(int i = 0; i != frequencies.size(); i++)
     {
-        const int minCount = 4, maxCount = 10;
+        const int minCount = 6, maxCount = 13;
         detections.Rvalues.at(i) = R.at(i);     // The latest R value for reference (overwrite, don't push)
         if(allRvalues.size() > 10000)
             cerr << "allRvalues reached a maximum. Please restart the program" << endl;

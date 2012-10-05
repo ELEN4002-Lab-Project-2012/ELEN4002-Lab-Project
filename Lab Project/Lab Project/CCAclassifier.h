@@ -20,7 +20,7 @@ private:
     double freqRes;
     int nChannels;
     vector<boost::shared_ptr<Signal>> channels;
-    mat Y;                                          // Y is the raw EEG data matrix
+    mat Y;		// Y is the matrix of Ideal signals with 6 harmoics
 };
 
 #endif

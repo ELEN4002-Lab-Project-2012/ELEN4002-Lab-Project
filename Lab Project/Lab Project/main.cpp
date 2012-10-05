@@ -6,6 +6,7 @@
 #include "Thread.h"
 #include "SSVEPMonitor.h"
 #include "Logger.h"
+#include "CCAclassifier.h"
 using namespace std;
 
 typedef boost::shared_ptr<Thread> CppThread;
@@ -19,7 +20,7 @@ int main()
     double SSVEPfreq1 = 10, SSVEPfreq2 = 13, SSVEPfreq3 = 18;
     vector<double> SSVEPfrequencies; 
     SSVEPfrequencies.push_back(SSVEPfreq1);
-    SSVEPfrequencies.push_back(SSVEPfreq2);
+    //SSVEPfrequencies.push_back(SSVEPfreq2);
     //SSVEPfrequencies.push_back(SSVEPfreq3);
 
     bool useTestData = false;                    // 0 = use raw EEG data, 1 = test data.
@@ -31,7 +32,8 @@ int main()
 
     // Here we choose the classifier type: PSDAclassifier, MECclassifier or CCAclassifier. In this case I chose MEC
     // The reason for have so many parameters is so that we can change them externally when testing. 
-	boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
+	//boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
+	boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
     boost::shared_ptr<SSVEPMonitor> myMonitor(new SSVEPMonitor(SSVEPfrequencies));
 
     /* Multithreading example ---------------------------------------------
