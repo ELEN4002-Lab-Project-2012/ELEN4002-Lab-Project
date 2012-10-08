@@ -135,29 +135,16 @@ void EmoController::loop()
     EE_DataSetBufferSizeInSec(secs);		            // Initialise the data buffer size in seconds
 
     // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread  
-    //while (!testComplete)
-	while (true)
+    while (!testComplete)
+	//while (true)
     {
 		state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
 
-		//RUDOLF WAS HERE
 		if (readytocollect) 
 		{
-            vector<double> Ratios;
-		    for(int i = 0; i != SSVEPfreqs.size(); i++) 
-            {	
-                // Process raw EEG data. Return a ratio for each of the multiple frequencies.
-                cout << "Frequency = " << SSVEPfreqs.at(i) << ": ";
-                Ratios.push_back(processEEGdata(SSVEPfreqs.at(i), test));
-                cout << "Ratio = " << Ratios.at(i) << endl;
-            }
-            // >>>>>>>>> HERE IS THE STRUCT <<<<<<<<<<<<
-           
+            vector<double> Ratios = processEEGdata(test);                   // Returns a vector of ratios for each detection frequency
             detections = monitor->monitorSSVEPDetections(Ratios, 0.95);     // SPECIFY THRESHOLD 0.95
 		}
-
-		//AND HERE
-
 
 
 		if (state == EDK_OK)                            // Operation has been carried out successfully (no error)
@@ -189,7 +176,7 @@ void EmoController::loop()
 						    for(int a=0; a < 10 ; a++)
 						    {
 							    cout << "*";
-							    Sleep(300);
+							    //Sleep(300);
 						    }
 						    cout << "\n" ;    
 				    }
@@ -278,13 +265,7 @@ void EmoController::loop()
 				    break;
 			}
         }
-		
-		
-		
 
-		
-        
-		
 		while (EE_EngineGetNextEvent(eEvent) != EDK_NO_EVENT ) 
 		{Sleep(1);}
 		
@@ -293,8 +274,9 @@ void EmoController::loop()
     testComplete = false;
 }
 
-double EmoController::processEEGdata(double desiredFreq, bool test)
-{    
+vector<double> EmoController::processEEGdata(bool test)
+{
+    // First initialise the data
     if(!test)
     {
         // Note that the developer’s application should access the EEG
@@ -324,7 +306,7 @@ double EmoController::processEEGdata(double desiredFreq, bool test)
             EE_DataGet(hData, ED_O2, dataO2, nSamplesTaken);
             EE_DataGet(hData, ED_P7, dataP7, nSamplesTaken);
             EE_DataGet(hData, ED_P8, dataP8, nSamplesTaken);
-
+            
             classifier->updateEEGData(dataO1, dataO2, dataP7, dataP8, nSamplesTaken);
 
             delete[] dataO1;
@@ -333,7 +315,18 @@ double EmoController::processEEGdata(double desiredFreq, bool test)
             delete[] dataP8;
         }
     }
-    return classifier->calculateRatio(desiredFreq);
+
+    // Now, using the updated data, find the ratio for each of the detection frequencies
+    vector<double> Ratios;
+    for(int i = 0; i != SSVEPfreqs.size(); i++) 
+    {
+        // Process raw EEG data. Return a ratio for each of the multiple frequencies.
+        cout << "Frequency = " << SSVEPfreqs.at(i) << ": ";
+        Ratios.push_back(classifier->calculateRatio(SSVEPfreqs.at(i)));
+        cout << "Ratio = " << Ratios.at(i) << endl;
+    }
+
+    return Ratios;
 }
 
 

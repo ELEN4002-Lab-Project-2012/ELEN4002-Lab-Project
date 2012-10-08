@@ -48,7 +48,7 @@ public:
 private:
     void connectEmoEngine();
     void initEmotiv();
-    double processEEGdata(double, bool);
+    vector<double> processEEGdata(bool);
     void initChannels(int nNewSamples);
     
     double delayTime;

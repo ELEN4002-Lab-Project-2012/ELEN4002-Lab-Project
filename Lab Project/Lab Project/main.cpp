@@ -17,7 +17,7 @@ int main()
 {
     int sampleSize = 256;
     const unsigned int sampleFreq = 128;
-    double SSVEPfreq1 = 10, SSVEPfreq2 = 13, SSVEPfreq3 = 18;
+    double SSVEPfreq1 = 11, SSVEPfreq2 = 13, SSVEPfreq3 = 18;
     vector<double> SSVEPfrequencies; 
     SSVEPfrequencies.push_back(SSVEPfreq1);
     //SSVEPfrequencies.push_back(SSVEPfreq2);
@@ -32,9 +32,9 @@ int main()
 
     // Here we choose the classifier type: PSDAclassifier, MECclassifier or CCAclassifier. In this case I chose MEC
     // The reason for have so many parameters is so that we can change them externally when testing. 
-	//boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
-	boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
-    boost::shared_ptr<SSVEPMonitor> myMonitor(new SSVEPMonitor(SSVEPfrequencies));
+	boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
+	//boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
+    boost::shared_ptr<SSVEPMonitor> myMonitor(new SSVEPMonitor(SSVEPfreq1));
 
     /* Multithreading example ---------------------------------------------
        Note that the EmoController can also be run on a separate thread. To do this, you need to:
@@ -47,7 +47,7 @@ int main()
 
     CppThread thread1(new Thread(myController));    // Create the thread
     thread1->start();                               // Resumes the thread & calls the loop function.
-    Sleep(30000);                                   // Main thread does something else while SSVEP algorithme executes....
+    Sleep(5000);                                   // Main thread does something else while SSVEP algorithme executes....
     testComplete = true;                            // To stop the thread, you need to change the testComplete variable (see test Suite main())
     thread1->waitForCompletion();                   // Wait for the thread to finish execution 
 

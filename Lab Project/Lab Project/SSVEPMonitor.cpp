@@ -2,7 +2,8 @@
 
 SSVEPMonitor::SSVEPMonitor(vector<double> freqs):
     nTotalDetections(0),
-    allRvalues(freqs.size())
+    allRvalues(freqs.size()),
+    minCount(0), maxCount(0)
 {
     frequencies = freqs;
     detections.frequencies = freqs;
@@ -51,7 +52,8 @@ FreqDetections SSVEPMonitor::monitorSSVEPDetections(const vector<double> &R, dou
     nTotalDetections++;
     for(int i = 0; i != frequencies.size(); i++)
     {
-        const int minCount = 6, maxCount = 13;
+        minCount = 6; 
+        maxCount = 13;
         detections.Rvalues.at(i) = R.at(i);     // The latest R value for reference (overwrite, don't push)
         if(allRvalues.size() > 10000)
             cerr << "allRvalues reached a maximum. Please restart the program" << endl;
@@ -73,6 +75,7 @@ FreqDetections SSVEPMonitor::monitorSSVEPDetections(const vector<double> &R, dou
         // "Hysteresis" of "minCount - minCount + 1". That is, if the count reaches 5, it requires 
         // 3 non-successful detections to return an overall negative SSVEP detection. 
         if(counter.at(i) >= minCount && counter.at(i) <= maxCount) {
+            cout << "counter.at(i) = " << counter.at(i) << endl;
             cout << " SSVEP present for freq = " << frequencies.at(i) << " :-)" << endl;
             detections.detected.at(i) = true;
             nPositiveDetections.at(i)++;
@@ -92,8 +95,9 @@ FreqAccuracy SSVEPMonitor::calculateAccuracy()
     if(nTotalDetections < 3)
         cerr << "Too few detections to calculate accuracy" << endl;
 
+    // Remember to get rid of the first few iteration results (up to minCount) which are always negative. 
     for(int i = 0; i != frequencies.size(); i++) {
-        accuracy.Accuracy.push_back(((double)nPositiveDetections.at(i)/(double)(nTotalDetections-3))*100); 
+        accuracy.Accuracy.push_back(((double)nPositiveDetections.at(i)/(double)(nTotalDetections-(minCount-1)))*100); 
         accuracy.frequencies.push_back(frequencies.at(i));
     }
     

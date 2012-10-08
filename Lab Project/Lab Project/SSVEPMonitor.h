@@ -31,6 +31,8 @@ private:
     vector<int> counter;                // A counter for each frequency
     vector<int> nPositiveDetections;
     unsigned int nTotalDetections;
+    int minCount;
+    int maxCount;
 };
 
 #endif

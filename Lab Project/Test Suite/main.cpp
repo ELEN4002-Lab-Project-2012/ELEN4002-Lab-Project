@@ -29,8 +29,8 @@ const int numChannels = 4;
 int sampleSize = 256;
 const unsigned int sampleFreq = 128;
 bool useTestData = false;               // Use test data or not 
-int testRunTime = 20;                   // Second: Total time each test runs for
-const unsigned int restTime = 6000;     // Milliseconds: Total time of rest between between 
+int testRunTime = 10;                   // Second: Total time each test runs for
+const unsigned int restTime = 1000;     // Milliseconds: Total time of rest between between 
 Logger testLogger;                      // Used for logging test results to file
 enum SSVEPCLASSIFIER {PSDA, MEC, CCA};
 boost::shared_ptr<SSVEPclassifier> myClassifier;
@@ -75,10 +75,10 @@ int main() {
     LEDPadding(controller, testClassifier);
     LEDRectangularWindow(controller, testClassifier);
     LEDChangeDelayTime(controller, testClassifier);
-    LEDFalsePositiveDetectionRate(controller, testClassifier);
-    LEDRValuesOverFreqRange(controller, testClassifier);*/
-    LEDMultipleFrequenciesInIsolation(controller, testClassifier);
-    LEDMultipleFrequenciesSimultaneously(controller, testClassifier);
+    LEDFalsePositiveDetectionRate(controller, testClassifier);*/
+    LEDRValuesOverFreqRange(controller, testClassifier);
+    //LEDMultipleFrequenciesInIsolation(controller, testClassifier);
+    //LEDMultipleFrequenciesSimultaneously(controller, testClassifier);
 
     // ================= MEC allegro tests ==================
     //plotMECRValues(controller, SSVEPflasher, MEC);
@@ -117,7 +117,7 @@ double LEDNoZeroPadding(Controller controller, SSVEPCLASSIFIER classifier)
             myClassifier.reset(new CCAclassifier(sampleSize, sampleFreq, numChannels)); break;
     }
     controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
-    cout << "Press any key to continue." << endl; cin.ignore();
+    cout << "Press any key to continue to LEDNoZeroPadding test." << endl; cin.ignore();
     cout << endl << "LEDNoZeroPadding test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
     CppThread thread1(new Thread(controller));
     thread1->start(); 
@@ -134,7 +134,7 @@ double LEDNoZeroPadding(Controller controller, SSVEPCLASSIFIER classifier)
 
 double LEDPadding(Controller controller, SSVEPCLASSIFIER classifier)
 {
-    cout << "Press any key to continue." << endl; cin.ignore();
+    cout << "Press any key to continue to LEDPadding test." << endl; cin.ignore();
     cout << endl << "LEDPadding test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
     double SSVEPfreq = 11;
     bool usePadding = true;
@@ -166,7 +166,7 @@ double LEDPadding(Controller controller, SSVEPCLASSIFIER classifier)
 
 double LEDRectangularWindow(Controller controller, SSVEPCLASSIFIER classifier)
 {
-cout << "Press any key to continue." << endl; cin.ignore();
+cout << "Press any key to continue to LEDRectangularWindow test." << endl; cin.ignore();
     cout << endl << "LEDRectangularWindow test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
     double SSVEPfreq = 11;
     bool usePadding = true;
@@ -198,7 +198,7 @@ cout << "Press any key to continue." << endl; cin.ignore();
 
 double LEDChangeDelayTime(Controller controller, SSVEPCLASSIFIER classifier)
 {
-cout << "Press any key to continue." << endl; cin.ignore();
+cout << "Press any key to continue to LEDChangeDelayTime test." << endl; cin.ignore();
     cout << endl << "LEDChangeDelayTime test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
     controller->setDelayTime(400);      // Double the delay time
     double SSVEPfreq = 11;
@@ -226,13 +226,13 @@ cout << "Press any key to continue." << endl; cin.ignore();
     FreqAccuracy accuracyStruct = monitor->calculateAccuracy();
     testLogger.logAccuracy("testChangeDelayTime", accuracyStruct.Accuracy.at(0));
     testLogger.logR("testChangeDelayTime", SSVEPfreq, monitor->getAllRForFreq(SSVEPfreq));
-    controller->setDelayTime(200);      // Reset the delay time back to 200ms
+    controller->setDelayTime(150);      // Reset the delay time back to 200ms
     return accuracyStruct.Accuracy.at(0);
 }
 
 double LEDFalsePositiveDetectionRate(Controller controller, SSVEPCLASSIFIER classifier)
 {
-cout << "Press any key to continue." << endl; cin.ignore();
+cout << "Press any key to continue to LEDFalsePositiveDetectionRate test." << endl; cin.ignore();
     cout << endl << "LEDFalsePositiveDetectionRate test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
     double SSVEPfreq = 18;                           // SSVEP detection freq different from actual frequency 
     bool usePadding = true;
@@ -281,7 +281,7 @@ void LEDRValuesOverFreqRange(Controller controller, SSVEPCLASSIFIER classifier)
 
     for(int i = 0; i != numFrequencies; i++)
     {
-        cout << "Press any key to continue." << endl; cin.ignore();
+        cout << "Press any key to continue to LEDRValuesOverFreqRange test." << endl; cin.ignore();
         cout << endl << "LEDRValuesOverFreqRange test for frequency = " << SSVEPfreq << " starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
         testComplete = false;
         controller->initClassifier(myClassifier, monitor, SSVEPfreq, useTestData);
@@ -306,9 +306,9 @@ void LEDRValuesOverFreqRange(Controller controller, SSVEPCLASSIFIER classifier)
    The user is requested to look at the one then the other */
 void LEDMultipleFrequenciesSimultaneously(Controller controller, SSVEPCLASSIFIER classifier)
 {
-    cout << "Press any key to continue." << endl; cin.ignore();
+    cout << "Press any key to continue to LEDMultipleFrequenciesSimultaneously test." << endl; cin.ignore();
     cout << endl << "LEDMultipleFrequenciesSimultaneously test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
-    double SSVEPfreq0 = 10, SSVEPfreq1 = 13;
+    double SSVEPfreq0 = 10, SSVEPfreq1 = 12;
     bool usePadding = true;
     Aquila::WindowType window = Aquila::WIN_HAMMING;
     testComplete = false; 
@@ -359,7 +359,7 @@ void LEDMultipleFrequenciesInIsolation(Controller controller, SSVEPCLASSIFIER cl
 {
     cout << "Press any key to continue." << endl; cin.ignore();
     cout << endl << "LEDMultipleFrequenciesInIsolation test starts in " << restTime/1000 << " seconds..." << endl; Sleep(restTime);
-    double SSVEPfreq0 = 10, SSVEPfreq1 = 13;
+    double SSVEPfreq0 = 10, SSVEPfreq1 = 12;
     bool usePadding = true;
     Aquila::WindowType window = Aquila::WIN_HAMMING;
     testComplete = false; 

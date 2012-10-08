@@ -33,8 +33,9 @@ double MECclassifier::calculateRatio(double desiredFreq)
         swFFT.calcFFT(SwArray, sampleSize);
 
         // Equation 11 -------
-        double upper = swFFT.getSpectrumMaxInRange(desiredFreq-0.1*desiredFreq, desiredFreq+0.1*desiredFreq);     // At f
+        double upper = swFFT.getSpectrumMaxInRange(desiredFreq-0.05*desiredFreq, desiredFreq+0.05*desiredFreq);     // At f
         double lower = swFFT.getSpectrumMaxInRange(6.0, swFFT.getMaxFreqInFFT());   // Over the whole spectrum
+        //cout << "Range = " << desiredFreq-0.05*desiredFreq << " to " << desiredFreq+0.05*desiredFreq << endl;
         double R = upper/lower;
         //cout << "R = " << R << ". ";             
         Ratios.push_back(R);
