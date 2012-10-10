@@ -28,6 +28,7 @@ public:
     double getSpectrumAverage();
     int getAbsFFTsize() {return absFFTsize;}
     double getMaxFreqInFFT() {return freqRes*absFFTsize;};
+    double integral(double f1, double f2);
 
     // For testing purposes - to view the output.
     void plotFFT();
@@ -47,6 +48,7 @@ private:
     double freqRes;
     vector<boost::shared_array<double>> FFTbuffer;
     bool padded;
+    double* normalisedSpectrum;
 
     boost::shared_ptr<Aquila::OouraFft> fft_ptr;
     Aquila::ComplexType* complexSpectrum;

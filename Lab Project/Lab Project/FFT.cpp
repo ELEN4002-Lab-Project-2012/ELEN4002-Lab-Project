@@ -28,6 +28,7 @@ void FFT::initFFT(int complexSize, double freq)
         absFFTsize = padSize/2;                                         // Positive half
         absSpectrum = boost::shared_array<double>(new double[padSize/2]);        
         aveAbsSpectrum = boost::shared_array<double>(new double[padSize/2]);
+        normalisedSpectrum = new double[absFFTsize];
     }
     else    // No zero padding
     {
@@ -39,6 +40,7 @@ void FFT::initFFT(int complexSize, double freq)
         aveAbsSpectrum = boost::shared_array<double>(new double[complexSize/2]);
         complexSpectrum = new Aquila::ComplexType[complexSize];
         fft_ptr = boost::shared_ptr<Aquila::OouraFft>(new Aquila::OouraFft(complexSize));
+        normalisedSpectrum = new double[absFFTsize];
     }
 }
 
@@ -78,6 +80,32 @@ void FFT::calcFFT(double* signal, int size)
     }
     
     initAbsoluteSpectrum();
+}
+
+double FFT::integral(double f1, double f2)
+{
+    if(f1 > f2)
+        cerr << "Lower frequency > higher frequency" << endl;
+    if(f1 < 0)
+        cerr << "Cannot find integral for negative frequencies" << endl;
+
+    // First normalise the FFT:
+    double max = getSpectrumMaxInRange(0, absFFTsize);
+    for(int i = 0; i != absFFTsize; i++)
+    {
+        normalisedSpectrum[i] = absSpectrum[i]/max;
+    }
+    int n1 = 0, n2 = 0;                 // Index of f1 and f2. n is a temp variable 
+    n1 = int(floor( f1 / freqRes ));    // Find the index corresponding to the freq. Note that f_i = n * delta_f
+    n2 = int(floor( f2 / freqRes ));
+
+    // Calculate the integral using a Riemann sum
+    double sum = 0;
+    for(int i = n1; i != n2; i++)
+    {
+        sum += normalisedSpectrum[i];
+    }
+    return sum*freqRes;
 }
 
 double* FFT::applyWindow(double* signal, int size)
@@ -213,11 +241,12 @@ void FFT::displaySpectrumValues()
 void FFT::printSpectrumCSV()
 {
     ofstream myfile;
-    myfile.open("test2.csv");
+    myfile.open("test.csv");
     myfile << "Frequency (Hz),Magnitude" << endl;
     for (int i=0; i!=absFFTsize; i++)
     {
         myfile << i*freqRes << "," << absSpectrum[i] << endl;
+        //myfile << i*freqRes << "," << 1 << endl;
     }
     myfile << endl;
     myfile.close();

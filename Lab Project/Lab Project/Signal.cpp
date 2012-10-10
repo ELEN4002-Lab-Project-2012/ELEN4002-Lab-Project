@@ -21,7 +21,7 @@ int Signal::testCounter = 0;
 void Signal::loadTestData()             // Just an arbitrary example showing the FFT algorithm
 {
     const double dt = 1.0/samplingFreq; 
-    const double testFreq = 10, f1 = 2, f2 = 16, f3 = 20;
+    const double testFreq = 11, f1 = 2, f2 = 16, f3 = 20;
     srand((unsigned)time(0));           // Seed random number generator
     testCounter++;
     
@@ -32,10 +32,10 @@ void Signal::loadTestData()             // Just an arbitrary example showing the
 
     for (std::size_t i = 0; i != sampleSize; ++i)
     {
-        signal1[i] = 1*(double)rand()/RAND_MAX + 0.6*sin(2*PI*testFreq*i*dt) + 0.4*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*2*i*dt);// + 0.6*sin(2*PI*11*i*dt) + 0.5*sin(2*PI*16*i*dt);
-        signal2[i] = 1*(double)rand()/RAND_MAX + 0.5*sin(2*PI*testFreq*i*dt) + 0.3*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*3*i*dt);// + 0.4*sin(2*PI*7*i*dt) + 0.6*sin(2*PI*20*i*dt);
-        signal3[i] = 1*(double)rand()/RAND_MAX + 0.4*sin(2*PI*testFreq*i*dt) + 0.6*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*4*i*dt);// + 0.5*sin(2*PI*8*i*dt) + 0.5*sin(2*PI*22*i*dt);
-        signal4[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.3*sin(2*PI*5*i*dt);// + 0.4*sin(2*PI*12*i*dt) + 0.4*sin(2*PI*15*i*dt);
+        signal1[i] = 1*(double)rand()/RAND_MAX + 0.6*sin(2*PI*testFreq*i*dt) + 0.4*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*2*i*dt) + 0.6*sin(2*PI*9*i*dt) + 0.5*sin(2*PI*16*i*dt);
+        signal2[i] = 1*(double)rand()/RAND_MAX + 0.5*sin(2*PI*testFreq*i*dt) + 0.3*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*3*i*dt) + 0.4*sin(2*PI*7*i*dt) + 0.6*sin(2*PI*20*i*dt);
+        signal3[i] = 1*(double)rand()/RAND_MAX + 0.4*sin(2*PI*testFreq*i*dt) + 0.6*sin(2*PI*2*testFreq*i*dt) + 0.4*sin(2*PI*4*i*dt) + 0.5*sin(2*PI*8*i*dt) + 0.5*sin(2*PI*22*i*dt);
+        signal4[i] = 1*(double)rand()/RAND_MAX + 0.7*sin(2*PI*testFreq*i*dt) + 0.5*sin(2*PI*2*testFreq*i*dt) + 0.3*sin(2*PI*5*i*dt) + 0.4*sin(2*PI*13*i*dt) + 0.4*sin(2*PI*15*i*dt);
     }
     if(testCounter == 1)
         signal = signal1;

@@ -18,6 +18,21 @@ PSDAclassifier::PSDAclassifier(int size, double sampleFreq, int numChannels, boo
 }
 
 double PSDAclassifier::calculateRatio(double desiredFreq)
+{
+    double f1 = desiredFreq;    // Fundamental 
+    vector<double> Ratios;
+    for(int i = 0; i != nChannels; i++)
+    {
+        double integr = FFTs.at(i)->integral(f1 - 0.05*f1, f1 + 0.05*f1);
+        Ratios.push_back(integr);
+        FFTs.at(i)->zeroSpectrum();
+    }
+    // Return only the maximum ratio found (may be on any of the channels)
+    return *max_element(Ratios.begin(),Ratios.end());
+}
+
+// DO NOT DELETE: OLD PSDA METHOD
+/*double PSDAclassifier::calculateRatio(double desiredFreq)
 {        
     double f1 = desiredFreq, f2 = 2*desiredFreq;    // Fundamental and second harmonic
     vector<double> Ratios;
@@ -36,7 +51,7 @@ double PSDAclassifier::calculateRatio(double desiredFreq)
     }
     // Return only the maximum ratio found (may be on any of the channels)
     return *max_element(Ratios.begin(),Ratios.end());
-}
+}*/
 
 // Note that this function has to be called before checking for SSVEPs
 void PSDAclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7, double* dataP8, int nSamplesTaken)
@@ -60,7 +75,8 @@ void PSDAclassifier::loadTestData()
 {
     for(int i = 0; i != nChannels; i++) {
         channels.at(i)->loadTestData();
+        channels.at(i)->processSignal();
         FFTs.at(i)->calcFFT(channels.at(i), sampleSize);
     }
-    //FFTs.at(0)->printSpectrumCSV();
+    FFTs.at(0)->printSpectrumCSV();
 }

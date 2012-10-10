@@ -33,8 +33,9 @@ int main()
 
     // Here we choose the classifier type: PSDAclassifier, MECclassifier or CCAclassifier. In this case I chose MEC
     // The reason for have so many parameters is so that we can change them externally when testing. 
-	//boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
-	boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
+	//boost::shared_ptr<PSDAclassifier> myClassifier(new PSDAclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
+	boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
+    //boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
     boost::shared_ptr<SSVEPMonitor> myMonitor(new SSVEPMonitor(SSVEPfreq1));
 
     /* Multithreading example ---------------------------------------------
@@ -71,41 +72,3 @@ int main()
 
     return 0;
 }
-
-/*  ORIGINAL AQUILA CODE
-    // input signal parameters
-    const std::size_t SIZE = 64;
-    const Aquila::FrequencyType sampleFreq = 2000;
-    const double dt = 1.0/sampleFreq;
-    const Aquila::FrequencyType f1 = 125, f2 = 700;
-
-    double* x = new double[SIZE];
-    for (std::size_t i = 0; i < SIZE; ++i)
-    {
-        x[i] = 32*std::sin(2*M_PI*f1*i*dt) + 8*std::sin(2*M_PI*f2*i*dt + 0.75*M_PI);
-    }
-
-    const int paddedSize = SIZE + 64;
-
-    printCSV(x, SIZE);
-    double* paddedSample = zeroPad(x, SIZE, paddedSize);
-    cout << endl << "After:" << endl;
-    for(int i = 0; i != paddedSize; i++)
-    {
-        cout << paddedSample[i] << " ";
-    }
-    //printCSV(paddedSample, paddedSize);
-    Aquila::TextPlot plt("Input signal");
-    plt.plot(x, SIZE);
-
-    // calculate the FFT
-    Aquila::OouraFft fft(SIZE);
-    Aquila::ComplexType spectrum[SIZE];
-    fft.fft(x, spectrum);
-
-    plt.setTitle("Spectrum");
-    plt.plotSpectrum(spectrum, SIZE);
-	system("PAUSE");
-
-    return 0;
-    */

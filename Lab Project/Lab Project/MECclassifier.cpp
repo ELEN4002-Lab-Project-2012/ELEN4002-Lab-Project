@@ -42,7 +42,8 @@ double MECclassifier::calculateRatio(double desiredFreq)
 
         swFFT.zeroSpectrum();                           // Don't forget to zero everything (Aquilla's problem!)
         delete SwArray;                                 // Clean up memory before returning
-        swFFT.printSpectrumCSV();
+        if(i == 0)
+            swFFT.printSpectrumCSV();
     }  
 
     return *max_element(Ratios.begin(),Ratios.end());   // Returns the maximum R value over all phases.
@@ -65,6 +66,12 @@ void MECclassifier::updateEEGData(double* dataO1, double* dataO2, double* dataP7
             Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
+
+    /*
+    FFT testFFT(sampleSize, samplingFreq, 1, Aquila::WIN_HAMMING);
+    testFFT.calcFFT(channels.at(0)->getAveEEGSignal(), sampleSize);     // Spectrum from channel O1
+    testFFT.printSpectrumCSV();
+    */
 }
 
 void MECclassifier::loadTestData()
@@ -80,6 +87,10 @@ void MECclassifier::loadTestData()
             Y(i, j) = channels.at(j)->getAveEEGSignal()[i];
         }
     }
+
+    /*FFT testFFT(sampleSize, samplingFreq, 1, Aquila::WIN_HAMMING);
+    testFFT.calcFFT(channels.at(0)->getAveEEGSignal(), sampleSize);     // Spectrum from channel O1
+    testFFT.printSpectrumCSV();*/
 }  
 /**
 *   @param phaseShift Phase shift of the pure harmonics in X
@@ -100,7 +111,6 @@ mat MECclassifier::findWeightedSignal(double fundamentalFreq, const double phase
     mat X_t    = trans(X);                     // Transpose of X
     mat Ytilde = Y - X*inv(X_t*X)*X_t*Y;       // Equation 6
     mat Ytilde_t = trans(Ytilde);
-    //printCSV(Ytilde, sampleSize, dt); 
 
     cx_vec eigval_complex;                     // Possible to get complex numbers
     cx_mat eigvec;
@@ -119,17 +129,13 @@ mat MECclassifier::findWeightedSignal(double fundamentalFreq, const double phase
     }
 
     mat W = abs(eigvec)*diagmat(1/sqrt(eigval));            // Equation 8
-    //cout << eigval << endl;
     double eigvalSum_Ny = sum(eigval.col(0)), eigvalSum_Ns = 0;
-    //cout << "eigvalSum_Ny = " << eigvalSum_Ny << endl;
     int Ns = 0;
     for (int i = 0; i != nChannels; i++)                    // Equation 9
     {
         eigvalSum_Ns += eigval(i, 0);
-        //cout << "Loop eigvalSum_Ns = " << eigvalSum_Ns << endl;
         if (eigvalSum_Ns > 0.1*eigvalSum_Ny) {
             Ns = i+1;
-            //cout << "found Ns = " << Ns << endl;
             break;
         }
     }
@@ -138,7 +144,6 @@ mat MECclassifier::findWeightedSignal(double fundamentalFreq, const double phase
     for (int i = 0; i != Ns; i++) {     // Equation 10
         Sw = Y*W.col(i);
     }
-    //printCSV(Sw, sampleSize, dt);     // NB: printing
     return Sw;
 }
 
