@@ -30,6 +30,7 @@ public:
     double* getEEGSignal() {return signal;}
     double* getAveEEGSignal() {return averagedSignal;}
     void highPassFilter(double *x, int size);
+	void firHighPassFilter(double* InputData, int sampleSize);
     void processSignal();
     void loadTestData();
 

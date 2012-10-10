@@ -33,6 +33,7 @@ public:
     void plotFFT();
     void displaySpectrumValues();
     void printSpectrumCSV();
+	void printSpectrumCSV(string fileName );
     void displayAverageSpectrum();
 
 private:

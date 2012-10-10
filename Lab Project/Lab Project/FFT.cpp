@@ -182,6 +182,11 @@ void FFT::initAbsoluteSpectrum()
 {
     for (std::size_t i = 0; i != absFFTsize; ++i)
         absSpectrum[i] = abs(complexSpectrum[i]);
+
+	absSpectrum[0] = 0;
+absSpectrum[1] = 0;
+absSpectrum[2] = 0;
+
 }
 
 // ----------- Plotting functions ------------
@@ -210,6 +215,19 @@ void FFT::printSpectrumCSV()
     ofstream myfile;
     myfile.open("test2.csv");
     myfile << "Frequency (Hz),Magnitude" << endl;
+    for (int i=0; i!=absFFTsize; i++)
+    {
+        myfile << i*freqRes << "," << absSpectrum[i] << endl;
+    }
+    myfile << endl;
+    myfile.close();
+}
+
+void FFT::printSpectrumCSV(string fileName )
+{
+    ofstream myfile;
+    myfile.open(fileName);
+   // myfile << "Frequency (Hz),Magnitude" << endl;
     for (int i=0; i!=absFFTsize; i++)
     {
         myfile << i*freqRes << "," << absSpectrum[i] << endl;

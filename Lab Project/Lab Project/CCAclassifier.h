@@ -3,6 +3,7 @@
 
 #include "SSVEPclassifier.h"
 #include "Signal.h"
+#include "FFT.h"
 #include <vector>
 #include <boost\shared_ptr.hpp>
 
@@ -13,7 +14,7 @@ public:
     virtual double calculateRatio(double desiredFreq);
     virtual void updateEEGData(double*, double*, double*, double*, int);
     virtual void loadTestData();                    // For testing purposes
-
+	
 private:
     int sampleSize;
     double samplingFreq;
@@ -21,6 +22,7 @@ private:
     int nChannels;
     vector<boost::shared_ptr<Signal>> channels;
     mat Y;		// Y is the matrix of Ideal signals with 6 harmoics
+	mat X;		// X is the Matric of sampeled data
 };
 
 #endif

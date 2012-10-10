@@ -1,3 +1,4 @@
+
 #include "EmoController.h"
 
 // Global variables for testing purposes
@@ -135,8 +136,8 @@ void EmoController::loop()
     EE_DataSetBufferSizeInSec(secs);		            // Initialise the data buffer size in seconds
 
     // The loop is discontinued once the test is complete. testComplete is a global variable set by the main test thread  
-    while (!testComplete)
-	//while (true)
+    //while (!testComplete)
+	while (true)
     {
 		state = EE_EngineGetNextEvent(eEvent);		    // Get the EmoEvent
 
@@ -439,5 +440,4 @@ bool EmoController::LoadProfile()
 	}
 
 	return LoadSuccess ;
-   
 }

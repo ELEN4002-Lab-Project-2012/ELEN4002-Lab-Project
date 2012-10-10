@@ -1,3 +1,4 @@
+
 #include "Signal.h"
 
 // TO DO: find a better way to intialise padded signals. 
@@ -60,8 +61,8 @@ void Signal::processSignal()
     for(int i = 0; i != sampleSize; i++)
         averagedSignal[i] = signal[i];
     
-    highPassFilter(averagedSignal, sampleSize);      // Remove the DC offset using HP. Result is stored in averagedSignal
-
+    //highPassFilter(averagedSignal, sampleSize);      // Remove the DC offset using HP. Result is stored in averagedSignal
+	firHighPassFilter(averagedSignal, sampleSize);
     //printAveragedSignalCSV();
 }
 
@@ -196,3 +197,110 @@ void Signal::plotSignal()
     plt.setTitle("Signal");
     plt.plot(signal, sampleSize);
 }
+
+
+
+void Signal::firHighPassFilter(double* InputData, int sampleSize)
+{
+	const int size_filter = 41;
+	double filterCoeff[size_filter];
+	double output[512];
+	filterCoeff[0] = -0.0011397890081787398;               
+	filterCoeff[1] =0.00958293759756681     ;            
+	filterCoeff[2] =0.0065705368964966461    ;           
+	filterCoeff[3] =0.0036782389883905993     ;          
+	filterCoeff[4] =0.003736235806468854       ;         
+	filterCoeff[5] =0.012079382486167441        ;        
+	filterCoeff[6] =0.024895747794782461         ;       
+	filterCoeff[7] =0.028412073714475506          ;      
+	filterCoeff[8] =0.011709082075425785           ;     
+	filterCoeff[9] =-0.018391761708099832           ;     
+	filterCoeff[10] =-0.03861755408506172             ;    
+	filterCoeff[11] =-0.031029330394827786             ;   
+	filterCoeff[12] =-0.0059406919757752225              ; 
+	filterCoeff[13] = 0.001000482063055628                ;
+	filterCoeff[14] =-0.037470999832249066;                
+	filterCoeff[15] =-0.1045386396821905   ;               
+	filterCoeff[16] =-0.14038242184928887   ;              
+	filterCoeff[17] =-0.088790767823845082   ;             
+	filterCoeff[18] = 0.047488907751349181    ;            
+	filterCoeff[19] = 0.19482492707118723      ;           
+	filterCoeff[20] = 0.25830189285206206       ;          
+	filterCoeff[21] = 0.19482492707118723        ;         
+	filterCoeff[22] = 0.047488907751349181        ;        
+	filterCoeff[23] =-0.088790767823845082         ;       
+	filterCoeff[24] =-0.14038242184928887           ;      
+	filterCoeff[25] =-0.1045386396821905             ;     
+	filterCoeff[26] =-0.037470999832249066            ;    
+	filterCoeff[27] =0.001000482063055628              ;  
+	filterCoeff[28] =-0.0059406919757752225             ;  
+	filterCoeff[29] =-0.031029330394827786               ; 
+	filterCoeff[30] =-0.03861755408506172                 ;
+	filterCoeff[31] =-0.018391761708099832                ;
+	filterCoeff[32] = 0.011709082075425785                ;
+	filterCoeff[33] = 0.028412073714475506                ;
+	filterCoeff[34] = 0.024895747794782461                ;
+	filterCoeff[35] = 0.012079382486167441                ;
+	filterCoeff[36] = 0.003736235806468854                ;
+	filterCoeff[37] = 0.0036782389883905993               ;
+	filterCoeff[38] = 0.0065705368964966461               ;
+	filterCoeff[39] = 0.00958293759756681                 ;
+	filterCoeff[40] =-0.0011397890081787398;
+
+	for(int j = 0;j < sampleSize;j++)
+	{
+		output[j] = 0;
+		for(int i = size_filter-1;i >=0;i--)
+		{  
+			if(j>=i)
+			{
+				output[j] += filterCoeff[i]*InputData[j-i];;
+			}
+		}
+	
+	
+	}
+	for(int j = 0;j < sampleSize;j++)
+	{
+		InputData[j] = output[j];
+	}
+
+
+}
+
+
+/*
+filterCoeff[0] = 0.034894037789514123   ;             
+	filterCoeff[1] = -0.081251899445473369;                
+	filterCoeff[2] =  0.0165727477707273   ;               
+	filterCoeff[3] = -0.017053963566709823  ;              
+	filterCoeff[4] = -0.028689286088943639   ;             
+	filterCoeff[5] = -0.015434782845975548    ;            
+	filterCoeff[6] = -0.037351046936487373     ;           
+	filterCoeff[7] = -0.062753937123087314      ;          
+	filterCoeff[8] = -0.031368764427579021       ;         
+	filterCoeff[9] =  0.0050945562385500409       ;        
+	filterCoeff[10] = -0.046179449020005217         ;       
+	filterCoeff[11] = -0.13570230434431391           ;      
+	filterCoeff[12] = -0.094456054351959473           ;     
+	filterCoeff[13] =  0.12873825387069171             ;    
+	filterCoeff[14] =  0.35198856384392174              ;   
+	filterCoeff[15] =  0.35198856384392174               ;  
+	filterCoeff[16] =  0.12873825387069171                ; 
+	filterCoeff[17] = -0.094456054351959473               ; 
+	filterCoeff[18] = -0.13570230434431391                 ;
+	filterCoeff[19] = -0.046179449020005217                ;
+	filterCoeff[20] =  0.0050945562385500409               ;
+	filterCoeff[21] = -0.031368764427579021     ;           
+	filterCoeff[22] = -0.062753937123087314     ;           
+	filterCoeff[23] = -0.037351046936487373     ;           
+	filterCoeff[24] = -0.015434782845975548    ;            
+	filterCoeff[25] = -0.028689286088943639     ;           
+	filterCoeff[26] = -0.017053963566709823   ;             
+	filterCoeff[27] =  0.0165727477707273    ;              
+	filterCoeff[28] = -0.081251899445473369 ;               
+	filterCoeff[29] =  0.034894037789514123;
+
+
+*/
+

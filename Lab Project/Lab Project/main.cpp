@@ -1,3 +1,4 @@
+
 #include "EmoController.h"
 #include "PSDAclassifier.h"
 #include "MECclassifier.h"
@@ -32,8 +33,8 @@ int main()
 
     // Here we choose the classifier type: PSDAclassifier, MECclassifier or CCAclassifier. In this case I chose MEC
     // The reason for have so many parameters is so that we can change them externally when testing. 
-	boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
-	//boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
+	//boost::shared_ptr<MECclassifier> myClassifier(new MECclassifier(sampleSize, sampleFreq, numChannels, usePadding, window));
+	boost::shared_ptr<CCAclassifier> myClassifier(new CCAclassifier(sampleSize, sampleFreq, numChannels));
     boost::shared_ptr<SSVEPMonitor> myMonitor(new SSVEPMonitor(SSVEPfreq1));
 
     /* Multithreading example ---------------------------------------------
@@ -108,4 +109,3 @@ int main()
 
     return 0;
     */
-
